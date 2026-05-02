@@ -1,1409 +1,1997 @@
 <!DOCTYPE html>
-
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Emotion AI PRO MAX</title>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=Noto+Kufi+Arabic:wght@300;400;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --cyan: #00f5ff;
-    --magenta: #ff00aa;
-    --gold: #ffd700;
-    --green: #00ff88;
-    --orange: #ff6b00;
-    --bg: #020408;
-    --bg2: #040b14;
-    --glass: rgba(0,245,255,0.04);
-    --glass-border: rgba(0,245,255,0.15);
-    --text: #e0f7ff;
-    --text-dim: rgba(224,247,255,0.5);
-    --panel-bg: rgba(4,11,20,0.85);
-    --radius: 16px;
-    --glow-cyan: 0 0 20px rgba(0,245,255,0.5), 0 0 60px rgba(0,245,255,0.15);
-    --glow-mag: 0 0 20px rgba(255,0,170,0.5), 0 0 60px rgba(255,0,170,0.15);
-  }
-  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+  />
+  <title>Emotion AI PRO MAX</title>
+  <meta name="theme-color" content="#070b18" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-2: #090d1e;
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --glass-border: rgba(255,255,255,0.14);
+      --text: #eef7ff;
+      --muted: #9ab0cb;
+      --cyan: #48f3ff;
+      --blue: #6aa8ff;
+      --pink: #ff4fd8;
+      --purple: #9a5dff;
+      --green: #58ffb5;
+      --orange: #ffb258;
+      --red: #ff5f7a;
+      --yellow: #ffe16e;
+      --shadow: 0 20px 80px rgba(0,0,0,0.45);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+    }
 
-body {
-font-family: ‘Space Grotesk’, sans-serif;
-color: var(–text);
-position: relative;
-}
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { overflow-x: hidden; }
 
-/* ── BACKGROUND ── */
-#bg-canvas {
-position: fixed; inset: 0; z-index: 0;
-width: 100%; height: 100%;
-pointer-events: none;
-}
+    body.ar {
+      font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
 
-/* ── GRID OVERLAY ── */
-body::before {
-content: ‘’;
-position: fixed; inset: 0; z-index: 1;
-background-image:
-linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
-background-size: 40px 40px;
-pointer-events: none;
-}
+    .bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(72,243,255,0.14), transparent 28%),
+        radial-gradient(circle at 90% 15%, rgba(255,79,216,0.15), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(154,93,255,0.14), transparent 28%),
+        linear-gradient(135deg, #02040d, #07101f 42%, #09061a 100%);
+      z-index: 0;
+    }
 
-/* ── MAIN LAYOUT ── */
-#app {
-position: relative; z-index: 2;
-width: 100%; height: 100vh;
-display: flex; flex-direction: column;
-overflow: hidden;
-}
+    .bg::before,
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle, rgba(72,243,255,0.08) 0%, transparent 18%),
+        radial-gradient(circle, rgba(255,79,216,0.06) 0%, transparent 16%);
+      background-size: 26rem 26rem, 22rem 22rem;
+      animation: drift 24s linear infinite;
+      filter: blur(6px);
+      opacity: 0.7;
+    }
 
-/* ── HEADER ── */
-#header {
-flex-shrink: 0;
-display: flex; align-items: center; justify-content: space-between;
-padding: 12px 20px;
-background: linear-gradient(180deg, rgba(0,245,255,0.06) 0%, transparent 100%);
-border-bottom: 1px solid var(–glass-border);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-}
-.logo {
-display: flex; align-items: center; gap: 10px;
-}
-.logo-icon {
-width: 36px; height: 36px;
-background: linear-gradient(135deg, var(–cyan), var(–magenta));
-border-radius: 8px;
-display: flex; align-items: center; justify-content: center;
-font-size: 18px;
-box-shadow: var(–glow-cyan);
-animation: logoGlow 3s ease-in-out infinite;
-}
-@keyframes logoGlow {
-0%,100% { box-shadow: var(–glow-cyan); }
-50% { box-shadow: var(–glow-mag); }
-}
-.logo-text {
-font-family: ‘Orbitron’, monospace;
-font-size: clamp(12px, 3vw, 16px);
-font-weight: 900;
-background: linear-gradient(90deg, var(–cyan), var(–magenta));
--webkit-background-clip: text; -webkit-text-fill-color: transparent;
-letter-spacing: 2px;
-}
-.logo-sub {
-font-size: 9px; color: var(–text-dim);
-letter-spacing: 3px; font-weight: 300;
-text-transform: uppercase;
-}
-.header-controls {
-display: flex; gap: 8px; align-items: center;
-}
+    .bg::after {
+      animation-duration: 32s;
+      animation-direction: reverse;
+      transform: scale(1.1);
+      opacity: 0.45;
+    }
 
-/* ── BUTTONS ── */
-.btn {
-padding: 8px 16px;
-border-radius: 8px;
-border: 1px solid var(–glass-border);
-background: var(–glass);
-color: var(–text);
-font-family: ‘Orbitron’, monospace;
-font-size: 10px;
-font-weight: 700;
-letter-spacing: 1px;
-cursor: pointer;
-transition: all 0.2s ease;
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-white-space: nowrap;
-}
-.btn:hover {
-border-color: var(–cyan);
-box-shadow: 0 0 15px rgba(0,245,255,0.3);
-background: rgba(0,245,255,0.08);
-transform: translateY(-1px);
-}
-.btn:active { transform: scale(0.96); }
-.btn.active {
-border-color: var(–magenta);
-background: rgba(255,0,170,0.12);
-color: var(–magenta);
-box-shadow: 0 0 15px rgba(255,0,170,0.3);
-}
-.btn.danger { border-color: #ff3060; color: #ff3060; }
-.btn.danger:hover { background: rgba(255,48,96,0.12); box-shadow: 0 0 15px rgba(255,48,96,0.3); }
-.btn-icon {
-padding: 8px 10px;
-font-size: 14px;
-}
+    @keyframes drift {
+      0%   { transform: translate3d(0,0,0) rotate(0deg); }
+      50%  { transform: translate3d(-4%, -2%, 0) rotate(180deg); }
+      100% { transform: translate3d(0,0,0) rotate(360deg); }
+    }
 
-/* ── CONTENT ── */
-#content {
-flex: 1;
-display: flex;
-gap: 0;
-overflow: hidden;
-position: relative;
-}
+    .grid-glow {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.16;
+      background-image:
+        linear-gradient(rgba(72,243,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(72,243,255,0.08) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
+      pointer-events: none;
+    }
 
-/* ── VIDEO ZONE ── */
-#video-zone {
-flex: 1;
-position: relative;
-display: flex; align-items: center; justify-content: center;
-overflow: hidden;
-min-width: 0;
-}
-#video {
-position: absolute;
-width: 100%; height: 100%;
-object-fit: cover;
-transform: scaleX(-1); /* mirror */
-}
-#overlay-canvas {
-position: absolute; inset: 0;
-width: 100%; height: 100%;
-pointer-events: none;
-z-index: 5;
-}
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding:
+        calc(18px + var(--safe-top))
+        calc(16px + var(--safe-right))
+        calc(20px + var(--safe-bottom))
+        calc(16px + var(--safe-left));
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 14px;
+    }
 
-/* ── LOADING SCREEN ── */
-#loading-screen {
-position: absolute; inset: 0;
-background: var(–bg);
-display: flex; flex-direction: column;
-align-items: center; justify-content: center;
-gap: 24px;
-z-index: 100;
-transition: opacity 0.8s ease;
-}
-#loading-screen.hidden { opacity: 0; pointer-events: none; }
-.loading-ring {
-width: 80px; height: 80px;
-position: relative;
-display: flex; align-items: center; justify-content: center;
-}
-.loading-ring svg {
-position: absolute; inset: 0;
-animation: ringRotate 2s linear infinite;
-}
-@keyframes ringRotate { to { transform: rotate(360deg); } }
-.loading-ring-inner {
-font-size: 24px;
-animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.9)} }
-.loading-title {
-font-family: ‘Orbitron’, monospace;
-font-size: clamp(16px,4vw,24px);
-font-weight: 900;
-background: linear-gradient(90deg, var(–cyan), var(–magenta));
--webkit-background-clip: text; -webkit-text-fill-color: transparent;
-text-align: center;
-}
-.loading-status {
-font-size: 12px; color: var(–text-dim);
-letter-spacing: 2px; text-align: center;
-min-height: 18px;
-}
-.progress-bar-container {
-width: 260px;
-background: rgba(255,255,255,0.05);
-border-radius: 99px;
-border: 1px solid var(–glass-border);
-overflow: hidden;
-height: 6px;
-}
-#progress-fill {
-height: 100%;
-background: linear-gradient(90deg, var(–cyan), var(–magenta));
-border-radius: 99px;
-transition: width 0.4s ease;
-width: 0%;
-box-shadow: 0 0 10px var(–cyan);
-}
-.progress-steps {
-display: flex; gap: 12px;
-}
-.p-step {
-display: flex; align-items: center; gap: 6px;
-font-size: 11px; color: var(–text-dim);
-}
-.p-step.done { color: var(–cyan); }
-.p-step .dot {
-width: 6px; height: 6px; border-radius: 50%;
-background: var(–text-dim);
-transition: background 0.3s, box-shadow 0.3s;
-}
-.p-step.done .dot {
-background: var(–cyan);
-box-shadow: 0 0 8px var(–cyan);
-}
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.06));
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+    }
 
-/* ── ERROR SCREEN ── */
-#error-screen {
-position: absolute; inset: 0;
-background: var(–bg);
-display: none;
-flex-direction: column;
-align-items: center; justify-content: center;
-gap: 16px; z-index: 100;
-padding: 24px; text-align: center;
-}
-#error-screen.show { display: flex; }
-.error-icon { font-size: 48px; }
-.error-title {
-font-family: ‘Orbitron’, monospace;
-font-size: 18px; color: #ff3060;
-}
-.error-msg { font-size: 13px; color: var(–text-dim); max-width: 320px; line-height: 1.6; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: var(--radius-xl);
+      padding: 14px 16px;
+    }
 
-/* ── SIDE PANEL ── */
-#side-panel {
-width: 300px;
-flex-shrink: 0;
-display: flex; flex-direction: column;
-background: var(–panel-bg);
-border-left: 1px solid var(–glass-border);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-overflow-y: auto;
-overflow-x: hidden;
-transition: transform 0.3s ease;
-z-index: 10;
-}
-#side-panel::-webkit-scrollbar { width: 4px; }
-#side-panel::-webkit-scrollbar-track { background: transparent; }
-#side-panel::-webkit-scrollbar-thumb { background: var(–glass-border); border-radius: 2px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
 
-/* ── FACE CARDS ── */
-#faces-container {
-flex: 1;
-padding: 16px;
-display: flex; flex-direction: column; gap: 14px;
-}
-.no-face-msg {
-text-align: center; color: var(–text-dim);
-font-size: 12px; letter-spacing: 1px;
-padding: 32px 16px;
-border: 1px dashed var(–glass-border);
-border-radius: var(–radius);
-animation: dimPulse 3s ease-in-out infinite;
-}
-@keyframes dimPulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      position: relative;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.32), transparent 36%),
+        linear-gradient(135deg, rgba(72,243,255,0.28), rgba(255,79,216,0.22) 55%, rgba(154,93,255,0.28));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow:
+        0 0 24px rgba(72,243,255,0.22),
+        inset 0 0 24px rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
 
-.face-card {
-background: linear-gradient(135deg, rgba(0,245,255,0.04), rgba(255,0,170,0.04));
-border: 1px solid var(–glass-border);
-border-radius: var(–radius);
-padding: 14px;
-transition: border-color 0.3s, box-shadow 0.3s;
-animation: cardIn 0.3s ease;
-}
-@keyframes cardIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
-.face-card.dominant-happy { border-color: rgba(0,255,136,0.4); box-shadow: 0 0 20px rgba(0,255,136,0.1); }
-.face-card.dominant-angry { border-color: rgba(255,48,96,0.4); box-shadow: 0 0 20px rgba(255,48,96,0.1); }
-.face-card.dominant-sad { border-color: rgba(80,140,255,0.4); box-shadow: 0 0 20px rgba(80,140,255,0.1); }
-.face-card.dominant-surprised { border-color: rgba(255,215,0,0.4); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
-.face-card.dominant-fearful { border-color: rgba(180,80,255,0.4); box-shadow: 0 0 20px rgba(180,80,255,0.1); }
-.face-card.dominant-disgusted { border-color: rgba(255,140,0,0.4); box-shadow: 0 0 20px rgba(255,140,0,0.1); }
-.face-card.dominant-neutral { border-color: var(–glass-border); }
+    .brand-icon::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: inset 0 0 20px rgba(72,243,255,0.14);
+    }
 
-.face-header {
-display: flex; align-items: center; gap: 10px;
-margin-bottom: 12px;
-}
-.face-id {
-width: 28px; height: 28px; border-radius: 50%;
-background: linear-gradient(135deg, var(–cyan), var(–magenta));
-display: flex; align-items: center; justify-content: center;
-font-family: ‘Orbitron’, monospace; font-size: 11px; font-weight: 700;
-color: #000; flex-shrink: 0;
-}
-.face-dominant {
-flex: 1;
-}
-.face-emotion-name {
-font-family: ‘Orbitron’, monospace;
-font-size: 13px; font-weight: 700;
-letter-spacing: 1px;
-}
-.face-emotion-pct {
-font-size: 11px; color: var(–text-dim); letter-spacing: 1px;
-}
-.face-emoji { font-size: 20px; flex-shrink: 0; }
+    .brand-icon::after {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      background: conic-gradient(from 0deg, transparent, rgba(72,243,255,0.35), transparent, rgba(255,79,216,0.24), transparent);
+      animation: spin 7s linear infinite;
+    }
 
-.emotion-bars { display: flex; flex-direction: column; gap: 6px; }
-.emotion-row {
-display: flex; align-items: center; gap: 8px;
-}
-.emotion-label {
-font-size: 10px; color: var(–text-dim);
-width: 70px; flex-shrink: 0;
-letter-spacing: 0.5px;
-white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.bar-track {
-flex: 1; height: 5px;
-background: rgba(255,255,255,0.06);
-border-radius: 99px; overflow: hidden;
-}
-.bar-fill {
-height: 100%; border-radius: 99px;
-transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
-position: relative;
-}
-.bar-fill::after {
-content: ‘’;
-position: absolute; right: 0; top: -2px;
-width: 2px; height: 9px;
-background: inherit;
-border-radius: 99px;
-filter: brightness(2);
-}
-.bar-pct {
-font-size: 9px; color: var(–text-dim);
-width: 28px; text-align: right; flex-shrink: 0;
-}
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
-.mood-description {
-margin-top: 10px;
-padding: 8px 10px;
-background: rgba(0,245,255,0.04);
-border-radius: 8px;
-border-left: 2px solid var(–cyan);
-font-size: 11px; color: var(–text-dim);
-line-height: 1.5;
-font-style: italic;
-transition: all 0.5s ease;
-}
-[dir=“rtl”] .mood-description { border-left: none; border-right: 2px solid var(–cyan); }
+    .brand-copy {
+      min-width: 0;
+    }
 
-/* ── BOTTOM BAR ── */
-#bottom-bar {
-flex-shrink: 0;
-padding: 10px 16px;
-display: flex; align-items: center; justify-content: space-between; gap: 8px;
-border-top: 1px solid var(–glass-border);
-background: var(–panel-bg);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-flex-wrap: wrap;
-}
-.stat-chip {
-display: flex; align-items: center; gap: 6px;
-padding: 5px 10px;
-background: var(–glass);
-border: 1px solid var(–glass-border);
-border-radius: 99px;
-font-size: 10px; color: var(–text-dim);
-letter-spacing: 0.5px;
-}
-.stat-chip .dot {
-width: 6px; height: 6px; border-radius: 50%;
-background: var(–green);
-box-shadow: 0 0 6px var(–green);
-animation: blink 1.5s ease-in-out infinite;
-}
-.stat-chip .dot.off { background: var(–text-dim); box-shadow: none; animation: none; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.stat-val { color: var(–text); font-weight: 600; font-family: ‘Orbitron’, monospace; font-size: 9px; }
+    .brand-copy h1 {
+      margin: 0;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-/* ── TOGGLE PANEL BTN (mobile) ── */
-#panel-toggle {
-display: none;
-position: fixed;
-right: 0; top: 50%;
-transform: translateY(-50%);
-z-index: 50;
-writing-mode: vertical-rl;
-padding: 12px 6px;
-background: rgba(0,245,255,0.1);
-border: 1px solid var(–glass-border);
-border-right: none;
-border-radius: 8px 0 0 8px;
-font-size: 10px; cursor: pointer;
-color: var(–cyan);
-letter-spacing: 2px;
-font-family: ‘Orbitron’, monospace;
-backdrop-filter: blur(10px);
-}
+    .brand-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: min(62vw, 720px);
+    }
 
-/* ── FACE BOX LABELS (on canvas handled via JS) ── */
+    .pro-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #051321;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--cyan), #b8fbff);
+      box-shadow: 0 0 18px rgba(72,243,255,0.28);
+    }
 
-/* ── RECORDING INDICATOR ── */
-#rec-indicator {
-display: none;
-position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-z-index: 20;
-padding: 6px 16px;
-background: rgba(255,48,96,0.15);
-border: 1px solid #ff3060;
-border-radius: 99px;
-font-family: ‘Orbitron’, monospace;
-font-size: 11px; color: #ff3060;
-letter-spacing: 2px;
-backdrop-filter: blur(10px);
-animation: recPulse 1s ease-in-out infinite;
-}
-#rec-indicator.show { display: block; }
-@keyframes recPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
 
-/* ── VOICE TOAST ── */
-#voice-toast {
-position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-z-index: 30;
-padding: 8px 20px;
-background: rgba(0,245,255,0.1);
-border: 1px solid var(–cyan);
-border-radius: 99px;
-font-size: 11px; color: var(–cyan);
-letter-spacing: 1px;
-backdrop-filter: blur(10px);
-pointer-events: none;
-opacity: 0;
-transition: opacity 0.3s ease;
-white-space: nowrap;
-}
-#voice-toast.show { opacity: 1; }
+    .mini-chip,
+    .btn {
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 999px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: transform .24s ease, box-shadow .24s ease, background .24s ease, border-color .24s ease;
+    }
 
-/* ── EMOTION COLORS ── */
-.color-happy { background: linear-gradient(90deg, #00ff88, #00c864); }
-.color-sad { background: linear-gradient(90deg, #507fff, #3060cc); }
-.color-angry { background: linear-gradient(90deg, #ff3060, #cc0040); }
-.color-surprised { background: linear-gradient(90deg, #ffd700, #ff9900); }
-.color-fearful { background: linear-gradient(90deg, #b450ff, #8020cc); }
-.color-disgusted { background: linear-gradient(90deg, #ff8c00, #cc6000); }
-.color-neutral { background: linear-gradient(90deg, #a0b4c8, #708090); }
+    .mini-chip {
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
 
-.text-happy { color: #00ff88; }
-.text-sad { color: #507fff; }
-.text-angry { color: #ff3060; }
-.text-surprised { color: #ffd700; }
-.text-fearful { color: #b450ff; }
-.text-disgusted { color: #ff8c00; }
-.text-neutral { color: #a0b4c8; }
+    .mini-chip .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 18px currentColor;
+      background: currentColor;
+      color: var(--green);
+      animation: pulseDot 1.8s infinite;
+    }
 
-/* ── MOBILE ── */
-@media (max-width: 700px) {
-#side-panel {
-position: fixed;
-right: 0; top: 0; bottom: 0;
-width: min(320px, 90vw);
-transform: translateX(100%);
-z-index: 40;
-}
-#side-panel.open { transform: translateX(0); }
-#panel-toggle { display: flex; align-items: center; }
-.logo-sub { display: none; }
-#bottom-bar { gap: 6px; }
-.stat-chip { padding: 4px 8px; font-size: 9px; }
-}
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.35); opacity: 1; }
+    }
 
-/* Arabic font override */
-[dir=“rtl”] .logo-text, [dir=“rtl”] .btn,
-[dir=“rtl”] .face-emotion-name, [dir=“rtl”] .emotion-label {
-font-family: ‘Noto Kufi Arabic’, ‘Orbitron’, monospace;
-}
-[dir=“rtl”] #header { flex-direction: row-reverse; }
-[dir=“rtl”] .header-controls { flex-direction: row-reverse; }
-[dir=“rtl”] .face-header { flex-direction: row-reverse; }
-[dir=“rtl”] #side-panel { border-left: none; border-right: 1px solid var(–glass-border); }
-[dir=“rtl”] #panel-toggle { right: auto; left: 0; border-radius: 0 8px 8px 0; border-right: 1px solid var(–glass-border); border-left: none; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
 
-/* Scrollbar */
+    .btn {
+      appearance: none;
+      outline: none;
+      cursor: pointer;
+      padding: 13px 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      min-height: 48px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    }
 
-- { scrollbar-width: thin; scrollbar-color: var(–glass-border) transparent; }
+    .btn:hover, .btn:active {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 14px 34px rgba(0,0,0,0.22), 0 0 28px rgba(72,243,255,0.12);
+    }
 
-/* Photo flash */
-#flash {
-position: fixed; inset: 0; z-index: 200;
-background: white; pointer-events: none;
-opacity: 0;
-}
-</style>
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(72,243,255,0.22), rgba(106,168,255,0.18));
+      border-color: rgba(72,243,255,0.34);
+      color: #eefdff;
+      box-shadow: 0 0 24px rgba(72,243,255,0.15), inset 0 0 24px rgba(72,243,255,0.08);
+    }
 
-</head>
-<body>
+    .btn.pink {
+      background: linear-gradient(135deg, rgba(255,79,216,0.24), rgba(154,93,255,0.18));
+      border-color: rgba(255,79,216,0.28);
+      box-shadow: 0 0 24px rgba(255,79,216,0.13), inset 0 0 24px rgba(255,79,216,0.06);
+    }
 
-<canvas id="bg-canvas"></canvas>
+    .btn.green {
+      background: linear-gradient(135deg, rgba(88,255,181,0.18), rgba(72,243,255,0.14));
+      border-color: rgba(88,255,181,0.28);
+      box-shadow: 0 0 24px rgba(88,255,181,0.13), inset 0 0 24px rgba(88,255,181,0.06);
+    }
 
-<div id="flash"></div>
-<div id="rec-indicator">⏺ REC</div>
-<div id="voice-toast">🔊 Speaking...</div>
+    .btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
 
-<div id="app">
-  <!-- HEADER -->
-  <div id="header">
-    <div class="logo">
-      <div class="logo-icon">🧠</div>
-      <div>
-        <div class="logo-text">EMOTION AI</div>
-        <div class="logo-sub">PRO MAX · REAL-TIME</div>
-      </div>
-    </div>
-    <div class="header-controls">
-      <button class="btn" id="lang-btn" onclick="toggleLang()">عربي</button>
-      <button class="btn btn-icon" id="voice-btn" onclick="toggleVoice()" title="Voice">🔊</button>
-      <button class="btn btn-icon" id="photo-btn" onclick="takePhoto()" title="Photo">📷</button>
-      <button class="btn btn-icon" id="record-btn" onclick="toggleRecord()" title="Record">⏺</button>
-    </div>
-  </div>
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+      gap: 14px;
+      min-height: 0;
+    }
 
-  <!-- CONTENT -->
+    .stage-wrap {
+      position: relative;
+      border-radius: 30px;
+      overflow: hidden;
+      min-height: 56vh;
+      box-shadow: var(--shadow), 0 0 90px rgba(72,243,255,0.08);
+      isolation: isolate;
+    }
 
-  <div id="content">
+    .stage-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(72,243,255,0.10), transparent 22%, transparent 76%, rgba(255,79,216,0.09)),
+        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 24%, transparent 76%, rgba(255,255,255,0.04));
+      pointer-events: none;
+      z-index: 5;
+    }
 
-```
-<!-- VIDEO ZONE -->
-<div id="video-zone">
-  <video id="video" autoplay muted playsinline></video>
-  <canvas id="overlay-canvas"></canvas>
+    .video-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 56vh;
+      background: radial-gradient(circle at center, rgba(72,243,255,0.06), rgba(3,7,18,0.9) 75%);
+      overflow: hidden;
+    }
 
-  <!-- LOADING -->
-  <div id="loading-screen">
-    <div class="loading-ring">
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="35" stroke="rgba(0,245,255,0.15)" stroke-width="2"/>
-        <path d="M40 5 A35 35 0 0 1 75 40" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/>
-        <defs>
-          <linearGradient id="lg1" x1="40" y1="5" x2="75" y2="40" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#00f5ff"/>
-            <stop offset="1" stop-color="#ff00aa"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="loading-ring-inner">🧠</div>
-    </div>
-    <div class="loading-title">EMOTION AI PRO MAX</div>
-    <div class="loading-status" id="loading-status">Initializing neural core...</div>
-    <div class="progress-bar-container">
-      <div id="progress-fill"></div>
-    </div>
-    <div class="progress-steps">
-      <div class="p-step" id="step-models"><div class="dot"></div><span data-en="Models" data-ar="النماذج">Models</span></div>
-      <div class="p-step" id="step-camera"><div class="dot"></div><span data-en="Camera" data-ar="الكاميرا">Camera</span></div>
-      <div class="p-step" id="step-engine"><div class="dot"></div><span data-en="Engine" data-ar="المحرك">Engine</span></div>
-    </div>
-  </div>
+    video, canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  <!-- ERROR -->
-  <div id="error-screen">
-    <div class="error-icon">⚠️</div>
-    <div class="error-title">SYSTEM ERROR</div>
-    <div class="error-msg" id="error-msg">Unable to initialize. Please ensure camera permissions are granted and HTTPS is used.</div>
-    <button class="btn" onclick="location.reload()">RETRY</button>
-  </div>
-</div>
+    #camera {
+      transform: scaleX(-1);
+      filter: contrast(1.03) saturate(1.05) brightness(1.02);
+      background: #02040b;
+    }
 
-<!-- SIDE PANEL -->
-<div id="side-panel">
-  <div id="faces-container">
-    <div class="no-face-msg" id="no-face-msg" data-en="🔍 Scanning for faces..." data-ar="🔍 جارٍ البحث عن وجوه...">🔍 Scanning for faces...</div>
-  </div>
-</div>
-```
+    #overlay {
+      pointer-events: none;
+    }
 
-  </div>
+    .hud-top,
+    .hud-bottom {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      pointer-events: none;
+    }
 
-  <!-- BOTTOM BAR -->
+    .hud-top { top: 14px; }
+    .hud-bottom { bottom: 14px; }
 
-  <div id="bottom-bar">
-    <div class="stat-chip">
-      <div class="dot" id="cam-dot"></div>
-      <span data-en="CAMERA" data-ar="الكاميرا">CAMERA</span>
-    </div>
-    <div class="stat-chip">
-      <span data-en="FACES:" data-ar="وجوه:">FACES:</span>
-      <span class="stat-val" id="face-count">0</span>
-    </div>
-    <div class="stat-chip">
-      <span data-en="FPS:" data-ar="إطار/ث:">FPS:</span>
-      <span class="stat-val" id="fps-display">--</span>
-    </div>
-    <div class="stat-chip">
-      <span data-en="CONFIDENCE:" data-ar="الثقة:">CONFIDENCE:</span>
-      <span class="stat-val" id="conf-display">--</span>
-    </div>
-    <div class="stat-chip" id="voice-status-chip" style="display:none">
-      <div class="dot"></div>
-      <span id="voice-status-text">VOICE ON</span>
-    </div>
-  </div>
-</div>
+    .hud-badge {
+      pointer-events: auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(6,12,27,0.45);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: var(--text);
+      font-size: 0.84rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.20);
+    }
 
-<!-- MOBILE PANEL TOGGLE -->
+    .hud-badge strong {
+      color: #fff;
+      font-weight: 800;
+    }
 
-<button id="panel-toggle" onclick="togglePanel()">PANEL</button>
+    .loading-overlay,
+    .error-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(72,243,255,0.14), transparent 30%),
+        linear-gradient(180deg, rgba(5,8,22,0.82), rgba(2,4,12,0.92));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: opacity .45s ease, visibility .45s ease;
+    }
 
-<script>
-// ═══════════════════════════════════════════════
-// CONFIG & STATE
-// ═══════════════════════════════════════════════
-const CDN = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2';
-const MODELS_URL = `${CDN}/weights`;
+    .loading-overlay.hidden,
+    .error-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-let lang = 'en';
-let voiceEnabled = true;
-let isRecording = false;
-let mediaRecorder = null;
-let recordedChunks = [];
-let detectionLoop = null;
-let lastFaces = [];
-let lastVoiceTime = 0;
-let lastSpokenEmotion = '';
-let fpsCounter = { frames: 0, last: Date.now(), fps: 0 };
-let panelOpen = false;
-let animationFrameId = null;
-let detectionRunning = false;
-let videoEl, canvasEl, ctx;
+    .loading-card,
+    .error-card {
+      width: min(560px, 100%);
+      padding: 22px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
 
-// Smoothed face data per face index
-let smoothedFaces = {};
+    .loading-card h2,
+    .error-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
 
-// ═══════════════════════════════════════════════
-// TRANSLATIONS
-// ═══════════════════════════════════════════════
-const EMOTIONS_EN = { happy:'Happy', sad:'Sad', angry:'Angry', surprised:'Surprised', neutral:'Neutral', fearful:'Fearful', disgusted:'Disgusted' };
-const EMOTIONS_AR = { happy:'سعيد', sad:'حزين', angry:'غاضب', surprised:'متفاجئ', neutral:'محايد', fearful:'خائف', disgusted:'مشمئز' };
-const EMOJIS = { happy:'😊', sad:'😢', angry:'😡', surprised:'😲', neutral:'😐', fearful:'😨', disgusted:'🤢' };
-const EMOTION_COLORS = { happy:'#00ff88', sad:'#507fff', angry:'#ff3060', surprised:'#ffd700', neutral:'#a0b4c8', fearful:'#b450ff', disgusted:'#ff8c00' };
+    .loading-card p,
+    .error-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
 
-const UI_TEXT = {
-  scanning: { en: '🔍 Scanning for faces...', ar: '🔍 جارٍ البحث عن وجوه...' },
-  camera: { en: 'CAMERA', ar: 'الكاميرا' },
-  faces: { en: 'FACES:', ar: 'وجوه:' },
-  fps: { en: 'FPS:', ar: 'إطار/ث:' },
-  conf: { en: 'CONFIDENCE:', ar: 'الثقة:' },
-  voiceOn: { en: 'VOICE ON', ar: 'الصوت مفعّل' },
-  face: { en: 'FACE', ar: 'وجه' },
-  loadModels: { en: 'Loading neural models...', ar: 'تحميل النماذج...' },
-  loadCamera: { en: 'Activating camera...', ar: 'تفعيل الكاميرا...' },
-  loadEngine: { en: 'Starting detection engine...', ar: 'تشغيل محرك الكشف...' },
-  ready: { en: 'System online. AI active.', ar: 'النظام جاهز. الذكاء الاصطناعي نشط.' },
-};
+    .progress-shell {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      position: relative;
+    }
 
-function t(key) { return UI_TEXT[key]?.[lang] || key; }
-function emotionName(e) { return lang === 'ar' ? (EMOTIONS_AR[e] || e) : (EMOTIONS_EN[e] || e); }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background:
+        linear-gradient(90deg, rgba(72,243,255,0.95), rgba(106,168,255,0.95), rgba(255,79,216,0.95));
+      box-shadow: 0 0 24px rgba(72,243,255,0.38);
+      transition: width .4s cubic-bezier(.22,1,.36,1);
+      position: relative;
+      overflow: hidden;
+    }
 
-// ═══════════════════════════════════════════════
-// BACKGROUND ANIMATION
-// ═══════════════════════════════════════════════
-function initBackground() {
-  const c = document.getElementById('bg-canvas');
-  const cx = c.getContext('2d');
-  let w, h, particles = [];
+    .progress-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+      animation: shimmer 1.5s linear infinite;
+    }
 
-  function resize() {
-    w = c.width = window.innerWidth;
-    h = c.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(100%); }
+    }
 
-  for (let i = 0; i < 40; i++) {
-    particles.push({
-      x: Math.random() * w, y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.5 + 0.5,
-      a: Math.random(),
-      color: Math.random() > 0.5 ? '#00f5ff' : '#ff00aa'
-    });
-  }
+    .progress-meta {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
 
-  function draw() {
-    cx.clearRect(0, 0, w, h);
-    // Nebula
-    const g = cx.createRadialGradient(w*0.5, h*0.5, 0, w*0.5, h*0.5, w*0.8);
-    g.addColorStop(0, 'rgba(0,245,255,0.015)');
-    g.addColorStop(0.5, 'rgba(255,0,170,0.008)');
-    g.addColorStop(1, 'transparent');
-    cx.fillStyle = g;
-    cx.fillRect(0, 0, w, h);
+    .panel {
+      border-radius: 28px;
+      padding: 14px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
 
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-      p.a = 0.3 + Math.abs(Math.sin(Date.now()*0.001 + p.x)) * 0.7;
-      cx.beginPath();
-      cx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      cx.fillStyle = p.color;
-      cx.globalAlpha = p.a * 0.6;
-      cx.fill();
-      cx.globalAlpha = 1;
-    });
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 2px 0;
+    }
 
-    // Connect nearby particles
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i+1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        if (dist < 100) {
-          cx.beginPath();
-          cx.moveTo(particles[i].x, particles[i].y);
-          cx.lineTo(particles[j].x, particles[j].y);
-          cx.strokeStyle = particles[i].color;
-          cx.globalAlpha = (1 - dist/100) * 0.15;
-          cx.lineWidth = 0.5;
-          cx.stroke();
-          cx.globalAlpha = 1;
-        }
+    .panel-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .face-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .face-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+      box-shadow: inset 0 0 24px rgba(255,255,255,0.02), 0 8px 24px rgba(0,0,0,0.18);
+      transform: translateY(0);
+      transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+    }
+
+    .face-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(72,243,255,0.18);
+      box-shadow: inset 0 0 24px rgba(72,243,255,0.03), 0 14px 30px rgba(0,0,0,0.22), 0 0 24px rgba(72,243,255,0.09);
+    }
+
+    .face-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -20% -55% -20%;
+      height: 120px;
+      background: radial-gradient(circle, rgba(72,243,255,0.12), transparent 60%);
+      pointer-events: none;
+    }
+
+    .face-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .face-index {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .face-index .face-orb {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      box-shadow: 0 0 16px currentColor;
+      background: currentColor;
+      color: var(--cyan);
+    }
+
+    .face-dominant {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .face-dominant .emotion-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 0 24px rgba(72,243,255,0.08);
+      animation: glowPulse 2.2s infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(72,243,255,0.08); }
+      50% { box-shadow: 0 0 26px rgba(72,243,255,0.18); }
+    }
+
+    .face-dominant small {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .mood-text {
+      margin: 0 0 12px;
+      color: #dff6ff;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 11px 12px;
+    }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .bar-fill {
+      --c: var(--cyan);
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--c) 72%, white 10%), var(--c));
+      box-shadow: 0 0 18px color-mix(in srgb, var(--c) 58%, transparent);
+      transition: width .55s cubic-bezier(.22,1,.36,1), background .35s ease;
+    }
+
+    .bar-value {
+      min-width: 54px;
+      text-align: end;
+      font-weight: 800;
+      color: #f4fbff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      text-align: center;
+      color: var(--muted);
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      padding-top: 4px;
+    }
+
+    .live-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric-card {
+      border-radius: 18px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .metric-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+    }
+
+    .metric-card strong {
+      font-size: 1.02rem;
+      letter-spacing: 0.02em;
+    }
+
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 999px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .panel {
+        min-height: 320px;
       }
     }
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
 
-// ═══════════════════════════════════════════════
-// PROGRESS UI
-// ═══════════════════════════════════════════════
-function setProgress(pct, status, stepId) {
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('loading-status').textContent = status;
-  if (stepId) {
-    document.getElementById(stepId)?.classList.add('done');
-  }
-}
+    @media (max-width: 720px) {
+      .app {
+        gap: 12px;
+        padding:
+          calc(12px + var(--safe-top))
+          calc(12px + var(--safe-right))
+          calc(16px + var(--safe-bottom))
+          calc(12px + var(--safe-left));
+      }
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-async function init() {
-  initBackground();
-  videoEl = document.getElementById('video');
-  canvasEl = document.getElementById('overlay-canvas');
-  ctx = canvasEl.getContext('2d');
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
 
-  try {
-    // Load models
-    setProgress(5, t('loadModels'));
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL);
-    setProgress(35, 'TinyFaceDetector ✓');
-    await faceapi.nets.faceExpressionNet.loadFromUri(MODELS_URL);
-    setProgress(65, 'ExpressionNet ✓');
-    document.getElementById('step-models').classList.add('done');
+      .brand-copy p {
+        white-space: normal;
+        max-width: 100%;
+      }
 
-    // Camera
-    setProgress(70, t('loadCamera'));
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false
-    });
-    videoEl.srcObject = stream;
-    await new Promise(r => videoEl.addEventListener('loadedmetadata', r, { once: true }));
-    await videoEl.play();
-    document.getElementById('cam-dot').classList.remove('off');
-    document.getElementById('step-camera').classList.add('done');
-    setProgress(85, t('loadEngine'));
+      .toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
-    // Resize canvas
-    function resizeCanvas() {
-      canvasEl.width = videoEl.videoWidth || videoEl.offsetWidth;
-      canvasEl.height = videoEl.videoHeight || videoEl.offsetHeight;
+      .video-stage,
+      .stage-wrap {
+        min-height: 52vh;
+      }
+
+      .live-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 76px 1fr auto;
+        gap: 8px;
+      }
+
+      .hud-top,
+      .hud-bottom {
+        left: 10px;
+        right: 10px;
+      }
+
+      .hud-badge {
+        font-size: 0.78rem;
+        padding: 9px 12px;
+      }
     }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    new ResizeObserver(resizeCanvas).observe(videoEl);
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid-glow"></div>
 
-    setProgress(100, t('ready'));
-    document.getElementById('step-engine').classList.add('done');
-
-    await new Promise(r => setTimeout(r, 600));
-    document.getElementById('loading-screen').classList.add('hidden');
-    setTimeout(() => document.getElementById('loading-screen').remove(), 900);
-
-    startDetectionLoop();
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById('loading-screen').classList.add('hidden');
-    document.getElementById('error-screen').classList.add('show');
-    let msg = err.message || 'Unknown error';
-    if (msg.includes('Permission') || msg.includes('NotAllowed')) msg = 'Camera permission denied. Please allow camera access and reload.';
-    if (msg.includes('NotFound') || msg.includes('Devices')) msg = 'No camera found on this device.';
-    document.getElementById('error-msg').textContent = msg;
-  }
-}
-
-// ═══════════════════════════════════════════════
-// DETECTION LOOP
-// ═══════════════════════════════════════════════
-function startDetectionLoop() {
-  let lastDetect = 0;
-  const DETECT_INTERVAL = 200; // ms between detections
-
-  async function loop(ts) {
-    animationFrameId = requestAnimationFrame(loop);
-
-    // FPS
-    fpsCounter.frames++;
-    if (ts - fpsCounter.last > 1000) {
-      fpsCounter.fps = Math.round(fpsCounter.frames * 1000 / (ts - fpsCounter.last));
-      fpsCounter.frames = 0;
-      fpsCounter.last = ts;
-      document.getElementById('fps-display').textContent = fpsCounter.fps;
-    }
-
-    // Draw (always)
-    drawFaces();
-
-    // Detect (throttled)
-    if (ts - lastDetect < DETECT_INTERVAL || detectionRunning) return;
-    lastDetect = ts;
-    detectionRunning = true;
-
-    try {
-      if (videoEl.readyState < 2) { detectionRunning = false; return; }
-      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 });
-      const results = await faceapi
-        .detectAllFaces(videoEl, opts)
-        .withFaceExpressions();
-      lastFaces = results || [];
-      updateSidePanel(lastFaces);
-      handleVoice(lastFaces);
-    } catch(e) { /* ignore frame errors */ }
-    detectionRunning = false;
-  }
-  requestAnimationFrame(loop);
-}
-
-// ═══════════════════════════════════════════════
-// CANVAS DRAWING
-// ═══════════════════════════════════════════════
-const boxSmooth = {}; // per-face-index smoothed box values
-
-function drawFaces() {
-  const vw = canvasEl.width = videoEl.offsetWidth || videoEl.videoWidth || 640;
-  const vh = canvasEl.height = videoEl.offsetHeight || videoEl.videoHeight || 480;
-  ctx.clearRect(0, 0, vw, vh);
-
-  if (!lastFaces.length) return;
-
-  const scaleX = vw / (videoEl.videoWidth || vw);
-  const scaleY = vh / (videoEl.videoHeight || vh);
-
-  lastFaces.forEach((face, idx) => {
-    const { x, y, width, height } = face.detection.box;
-
-    // Mirror (video is CSS-mirrored, so we mirror the canvas coord)
-    const mx = vw - (x + width) * scaleX;
-    const my = y * scaleY;
-    const mw = width * scaleX;
-    const mh = height * scaleY;
-
-    // Smooth
-    if (!boxSmooth[idx]) boxSmooth[idx] = { x: mx, y: my, w: mw, h: mh };
-    const s = boxSmooth[idx];
-    const lerp = 0.25;
-    s.x += (mx - s.x) * lerp;
-    s.y += (my - s.y) * lerp;
-    s.w += (mw - s.w) * lerp;
-    s.h += (mh - s.h) * lerp;
-
-    const dominant = getDominant(face.expressions);
-    const color = EMOTION_COLORS[dominant.emotion] || '#00f5ff';
-    const pct = Math.round(dominant.score * 100);
-
-    drawBox(s.x, s.y, s.w, s.h, color, idx + 1, dominant, pct);
-  });
-  // Cleanup old smooth slots
-  Object.keys(boxSmooth).forEach(k => { if (parseInt(k) >= lastFaces.length) delete boxSmooth[k]; });
-}
-
-function drawBox(x, y, w, h, color, id, dominant, pct) {
-  const t2 = Date.now() * 0.001;
-  const pulse = 0.6 + Math.sin(t2 * 2 + id) * 0.4;
-
-  ctx.save();
-
-  // Glow
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 20 * pulse;
-
-  // Corner brackets
-  const cs = Math.min(w, h) * 0.2; // corner size
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.9;
-
-  // TL
-  ctx.beginPath(); ctx.moveTo(x, y + cs); ctx.lineTo(x, y); ctx.lineTo(x + cs, y); ctx.stroke();
-  // TR
-  ctx.beginPath(); ctx.moveTo(x+w-cs, y); ctx.lineTo(x+w, y); ctx.lineTo(x+w, y+cs); ctx.stroke();
-  // BL
-  ctx.beginPath(); ctx.moveTo(x, y+h-cs); ctx.lineTo(x, y+h); ctx.lineTo(x+cs, y+h); ctx.stroke();
-  // BR
-  ctx.beginPath(); ctx.moveTo(x+w-cs, y+h); ctx.lineTo(x+w, y+h); ctx.lineTo(x+w, y+h-cs); ctx.stroke();
-
-  // Scanning line
-  const scanY = y + ((t2 * 80 * pulse) % h);
-  const scanGrad = ctx.createLinearGradient(x, scanY - 10, x, scanY + 10);
-  scanGrad.addColorStop(0, 'transparent');
-  scanGrad.addColorStop(0.5, color + '88');
-  scanGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = scanGrad;
-  ctx.globalAlpha = 0.4;
-  ctx.fillRect(x, scanY - 10, w, 20);
-
-  // Face ID dot
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur = 10;
-  ctx.beginPath();
-  ctx.arc(x + 16, y + 16, 10, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.85;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#000';
-  ctx.font = 'bold 10px Orbitron, monospace';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.globalAlpha = 1;
-  ctx.fillText(id, x + 16, y + 16);
-
-  // Label above box
-  const emoji = EMOJIS[dominant.emotion] || '';
-  const label = `${emoji} ${emotionName(dominant.emotion).toUpperCase()} ${pct}%`;
-  const labelPad = 8;
-  ctx.font = 'bold 12px Orbitron, monospace';
-  const lw = ctx.measureText(label).width + labelPad * 2;
-
-  // Label bg
-  ctx.globalAlpha = 0.85;
-  ctx.fillStyle = '#040b14';
-  const ly = Math.max(0, y - 28);
-  roundRect(ctx, x, ly, lw, 22, 6);
-  ctx.fill();
-
-  // Label border
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1;
-  ctx.shadowColor = color; ctx.shadowBlur = 8;
-  roundRect(ctx, x, ly, lw, 22, 6);
-  ctx.stroke();
-
-  // Label text
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = '#fff';
-  ctx.shadowBlur = 0;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(label, x + labelPad, ly + 11);
-
-  ctx.restore();
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-// ═══════════════════════════════════════════════
-// SIDE PANEL
-// ═══════════════════════════════════════════════
-function updateSidePanel(faces) {
-  const container = document.getElementById('faces-container');
-  document.getElementById('face-count').textContent = faces.length;
-
-  if (!faces.length) {
-    container.innerHTML = `<div class="no-face-msg">${lang==='ar'?'🔍 جارٍ البحث عن وجوه...':'🔍 Scanning for faces...'}</div>`;
-    document.getElementById('conf-display').textContent = '--';
-    return;
-  }
-
-  // Update confidence avg
-  const avgConf = faces.reduce((a, f) => a + f.detection.score, 0) / faces.length;
-  document.getElementById('conf-display').textContent = Math.round(avgConf * 100) + '%';
-
-  // Rebuild or update cards
-  const existingCards = container.querySelectorAll('.face-card');
-
-  faces.forEach((face, idx) => {
-    const dom = getDominant(face.expressions);
-    const sorted = sortEmotions(face.expressions);
-
-    let card = container.querySelector(`[data-face="${idx}"]`);
-    if (!card) {
-      card = document.createElement('div');
-      card.className = 'face-card';
-      card.dataset.face = idx;
-      container.appendChild(card);
-    }
-
-    // Update dominant class
-    card.className = `face-card dominant-${dom.emotion}`;
-    card.dataset.face = idx;
-
-    const desc = getMoodDescription(face.expressions, dom, lang);
-
-    card.innerHTML = `
-      <div class="face-header">
-        <div class="face-id">${idx+1}</div>
-        <div class="face-dominant">
-          <div class="face-emotion-name text-${dom.emotion}">${emotionName(dom.emotion)}</div>
-          <div class="face-emotion-pct">${Math.round(dom.score*100)}% ${lang==='ar'?'ثقة':'confidence'}</div>
+  <div class="app">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <h1>
+            <span id="appTitle">Emotion AI PRO MAX</span>
+            <span class="pro-pill" id="proPill">LIVE AI</span>
+          </h1>
+          <p id="appSubtitle">Realtime emotion intelligence with futuristic multi-face tracking.</p>
         </div>
-        <div class="face-emoji">${EMOJIS[dom.emotion]||''}</div>
       </div>
-      <div class="emotion-bars">
-        ${sorted.map(e => `
-          <div class="emotion-row">
-            <div class="emotion-label">${emotionName(e.emotion)}</div>
-            <div class="bar-track">
-              <div class="bar-fill color-${e.emotion}" style="width:${Math.round(e.score*100)}%"></div>
+
+      <div class="top-actions">
+        <div class="mini-chip">
+          <span class="dot"></span>
+          <span id="statusText">Initializing...</span>
+        </div>
+        <button class="btn primary" id="langToggle" type="button">AR</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <button class="btn primary" id="captureBtn" type="button" disabled>📸 Take Photo</button>
+      <button class="btn pink" id="recordBtn" type="button" disabled>⏺ Record</button>
+      <button class="btn green" id="retryBtn" type="button">↻ Retry Camera</button>
+      <button class="btn" id="voiceBtn" type="button">🔊 Voice: ON</button>
+    </section>
+
+    <section class="main-grid">
+      <div class="stage-wrap glass">
+        <div class="video-stage" id="stage">
+          <video id="camera" autoplay muted playsinline webkit-playsinline></video>
+          <canvas id="overlay"></canvas>
+
+          <div class="hud-top">
+            <div class="hud-badge">
+              <span id="facesLabel">Faces</span>
+              <strong id="faceCount">0</strong>
             </div>
-            <div class="bar-pct">${Math.round(e.score*100)}%</div>
+            <div class="hud-badge">
+              <span id="fpsLabel">Analysis</span>
+              <strong id="fpsValue">0 fps</strong>
+            </div>
           </div>
-        `).join('')}
+
+          <div class="hud-bottom">
+            <div class="hud-badge">
+              <span id="cameraStateLabel">Camera</span>
+              <strong id="cameraState">Waiting</strong>
+            </div>
+            <div class="hud-badge">
+              <span id="modeLabel">Mode</span>
+              <strong id="modeValue">TinyFace + Expressions</strong>
+            </div>
+          </div>
+
+          <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-card">
+              <h2 id="loadingTitle">Booting Emotion AI PRO MAX</h2>
+              <p id="loadingDesc">Preparing neural models, webcam pipeline, and live rendering stack.</p>
+              <div class="progress-shell">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+              <div class="progress-meta">
+                <span id="progressStep">Starting...</span>
+                <strong id="progressPct">0%</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="error-overlay hidden" id="errorOverlay">
+            <div class="error-card">
+              <h2 id="errorTitle">Camera or model error</h2>
+              <p id="errorMessage">Please allow camera access and make sure the page is running over HTTPS.</p>
+              <button class="btn primary" id="retryInlineBtn" type="button">Try Again</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mood-description">${desc}</div>
-    `;
-  });
 
-  // Remove extra cards
-  container.querySelectorAll('.face-card').forEach(c => {
-    if (parseInt(c.dataset.face) >= faces.length) c.remove();
-  });
-}
+      <aside class="panel glass">
+        <div class="panel-head">
+          <h3 id="panelTitle">Live Emotion Breakdown</h3>
+          <span id="panelHint">Sorted confidence bars for every detected face</span>
+        </div>
 
-// ═══════════════════════════════════════════════
-// MOOD DESCRIPTION (AI-style dynamic)
-// ═══════════════════════════════════════════════
-function getMoodDescription(expressions, dom, lang) {
-  const happy = expressions.happy || 0;
-  const sad = expressions.sad || 0;
-  const angry = expressions.angry || 0;
-  const surprised = expressions.surprised || 0;
-  const fearful = expressions.fearful || 0;
-  const disgusted = expressions.disgusted || 0;
-  const neutral = expressions.neutral || 0;
-  const pct = Math.round(dom.score * 100);
-  const e = dom.emotion;
+        <div class="live-strip">
+          <div class="metric-card">
+            <span id="metricDomLabel">Top Mood</span>
+            <strong id="metricDominant">—</strong>
+          </div>
+          <div class="metric-card">
+            <span id="metricConfLabel">Top Confidence</span>
+            <strong id="metricConfidence">0%</strong>
+          </div>
+          <div class="metric-card">
+            <span id="metricSpeechLabel">Voice</span>
+            <strong id="metricSpeech">Ready</strong>
+          </div>
+        </div>
 
-  const descriptions_en = {
-    happy: [
-      pct > 90 ? "Radiating pure joy — a completely genuine smile." :
-      pct > 70 ? "Clearly happy, with warm and open expression." :
-      happy > 0.4 && neutral > 0.3 ? "Smiling softly, though keeping some composure." :
-      "A hint of happiness breaking through.",
-    ],
-    sad: [
-      pct > 80 ? "Deep sadness is evident — eyes and expression heavy." :
-      pct > 55 ? "Visibly sad, carrying something emotionally." :
-      sad > 0.3 && neutral > 0.3 ? "Traces of sadness beneath a neutral mask." :
-      "Slightly downcast, processing something quietly.",
-    ],
-    angry: [
-      pct > 85 ? "Intense anger — facial muscles tense, jaw set firm." :
-      pct > 60 ? "Clearly frustrated or angry right now." :
-      angry > 0.3 && neutral > 0.2 ? "Trying to stay calm but irritation is visible." :
-      "A flicker of annoyance, barely contained.",
-    ],
-    surprised: [
-      pct > 80 ? "Completely caught off guard — wide-eyed and speechless." :
-      pct > 55 ? "Genuinely surprised by something unexpected." :
-      surprised > 0.3 && happy > 0.2 ? "Pleasantly surprised — almost excited." :
-      "Mildly startled, processing new information.",
-    ],
-    fearful: [
-      pct > 80 ? "Showing real fear — body is on high alert." :
-      pct > 55 ? "Visibly anxious or frightened." :
-      fearful > 0.3 && neutral > 0.3 ? "Concealing nervousness behind a composed exterior." :
-      "A slight unease, perhaps uncertain of what's ahead.",
-    ],
-    disgusted: [
-      pct > 80 ? "Strong disgust — wrinkled nose, mouth pulled back." :
-      pct > 55 ? "Clearly repulsed by something." :
-      disgusted > 0.3 && angry > 0.2 ? "Disgust mixed with frustration — deeply displeased." :
-      "A mild distaste, quietly disapproving.",
-    ],
-    neutral: [
-      neutral > 0.85 ? "Completely composed — a truly unreadable expression." :
-      happy > 0.15 ? "Neutral but with a trace of warmth — at ease." :
-      sad > 0.15 ? "Outwardly calm, but something might be weighing on them." :
-      "Settled and still — the mind is elsewhere.",
-    ],
-  };
+        <div class="face-list" id="faceList">
+          <div class="empty-state" id="emptyState">
+            <div>
+              <div style="font-size:1.1rem;font-weight:800;margin-bottom:8px;" id="emptyTitle">No faces detected yet</div>
+              <div id="emptyDesc">Point the camera toward one or more faces to begin live emotion analysis.</div>
+            </div>
+          </div>
+        </div>
 
-  const descriptions_ar = {
-    happy: [
-      pct > 90 ? "يشع فرحاً حقيقياً — ابتسامة صادقة تملأ الوجه." :
-      pct > 70 ? "سعيد بوضوح، تعبيره منفتح ودافئ." :
-      happy > 0.4 && neutral > 0.3 ? "يبتسم بهدوء مع شيء من الرزانة." :
-      "لمسة صغيرة من البهجة تظهر على الوجه.",
-    ],
-    sad: [
-      pct > 80 ? "حزن عميق واضح — الأعين والتعبير ثقيلان." :
-      pct > 55 ? "حزين بشكل ملحوظ، يحمل شيئاً عاطفياً." :
-      sad > 0.3 && neutral > 0.3 ? "آثار حزن خلف قناع محايد." :
-      "يبدو منكسراً قليلاً، يعالج شيئاً في صمت.",
-    ],
-    angry: [
-      pct > 85 ? "غضب حاد — عضلات الوجه متوترة، الفك مشدود." :
-      pct > 60 ? "يبدو محبطاً أو غاضباً الآن." :
-      angry > 0.3 && neutral > 0.2 ? "يحاول التحكم بنفسه لكن الانزعاج واضح." :
-      "لحظة احتقان خفيف، يكاد ينكشف.",
-    ],
-    surprised: [
-      pct > 80 ? "مندهش تماماً — عيون واسعة وبلا كلام." :
-      pct > 55 ? "مفاجأة حقيقية من شيء غير متوقع." :
-      surprised > 0.3 && happy > 0.2 ? "مفاجأة سارة — يكاد يكون متحمساً." :
-      "دهشة خفيفة، يعالج معلومة جديدة.",
-    ],
-    fearful: [
-      pct > 80 ? "خوف حقيقي واضح — الجسم في حالة تأهب." :
-      pct > 55 ? "يبدو قلقاً أو خائفاً بشكل ملحوظ." :
-      fearful > 0.3 && neutral > 0.3 ? "يخفي التوتر خلف مظهر هادئ." :
-      "قلق خفيف، ربما غير متأكد مما هو قادم.",
-    ],
-    disgusted: [
-      pct > 80 ? "اشمئزاز واضح — أنف مجعد وفم منقبض." :
-      pct > 55 ? "يبدو منزعجاً جداً من شيء ما." :
-      disgusted > 0.3 && angry > 0.2 ? "اشمئزاز ممزوج بإحباط — استياء عميق." :
-      "كراهية خفيفة، رفض صامت.",
-    ],
-    neutral: [
-      neutral > 0.85 ? "هادئ تماماً — تعبير لا يمكن قراءته." :
-      happy > 0.15 ? "محايد لكن بدفء خفي — مرتاح." :
-      sad > 0.15 ? "هادئ من الخارج، لكن ربما هناك ما يشغل باله." :
-      "ثابت وصامت — عقله في مكان آخر.",
-    ],
-  };
+        <div class="footer-note" id="footerNote">
+          Voice announcements trigger only for very high confidence detections to avoid spam.
+        </div>
+      </aside>
+    </section>
+  </div>
 
-  const pool = lang === 'ar' ? descriptions_ar[e] : descriptions_en[e];
-  return pool ? pool[0] : (lang === 'ar' ? 'جارٍ التحليل...' : 'Analyzing expression...');
-}
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+  <script>
+    (() => {
+      'use strict';
 
-// ═══════════════════════════════════════════════
-// VOICE
-// ═══════════════════════════════════════════════
-function handleVoice(faces) {
-  if (!voiceEnabled || !faces.length) return;
-  const now = Date.now();
-  if (now - lastVoiceTime < 8000) return; // 8s cooldown
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      const EMOTION_KEYS = ['happy', 'neutral', 'surprised', 'sad', 'angry', 'fearful', 'disgusted'];
 
-  const dom = getDominant(faces[0].expressions);
-  if (dom.score < 0.85) return;
-  if (dom.emotion === lastSpokenEmotion && now - lastVoiceTime < 20000) return;
+      const EMOTION_COLORS = {
+        happy: '#58ffb5',
+        neutral: '#6aa8ff',
+        surprised: '#ffe16e',
+        sad: '#7bb6ff',
+        angry: '#ff5f7a',
+        fearful: '#ffb258',
+        disgusted: '#d078ff'
+      };
 
-  lastVoiceTime = now;
-  lastSpokenEmotion = dom.emotion;
+      const I18N = {
+        en: {
+          dir: 'ltr',
+          appSubtitle: 'Realtime emotion intelligence with futuristic multi-face tracking.',
+          statusInit: 'Initializing...',
+          statusLoading: 'Loading models...',
+          statusReady: 'Live analysis active',
+          statusError: 'Action required',
+          capture: '📸 Take Photo',
+          record: '⏺ Record',
+          stopRecord: '⏹ Stop Recording',
+          retry: '↻ Retry Camera',
+          voiceOn: '🔊 Voice: ON',
+          voiceOff: '🔇 Voice: OFF',
+          faces: 'Faces',
+          analysis: 'Analysis',
+          camera: 'Camera',
+          mode: 'Mode',
+          waiting: 'Waiting',
+          ready: 'Ready',
+          panelTitle: 'Live Emotion Breakdown',
+          panelHint: 'Sorted confidence bars for every detected face',
+          emptyTitle: 'No faces detected yet',
+          emptyDesc: 'Point the camera toward one or more faces to begin live emotion analysis.',
+          footerNote: 'Voice announcements trigger only for very high confidence detections to avoid spam.',
+          metricTopMood: 'Top Mood',
+          metricTopConf: 'Top Confidence',
+          metricSpeech: 'Voice',
+          speechReady: 'Ready',
+          speechMuted: 'Muted',
+          loadingTitle: 'Booting Emotion AI PRO MAX',
+          loadingDesc: 'Preparing neural models, webcam pipeline, and live rendering stack.',
+          errorTitle: 'Camera or model error',
+          retryInline: 'Try Again',
+          face: 'Face',
+          confidence: 'Confidence',
+          savedPhoto: 'PNG snapshot downloaded',
+          savedVideo: 'Recorded video saved',
+          recording: 'Recording...',
+          noRecorder: 'Recording is not supported in this browser.',
+          camLive: 'Live',
+          camDenied: 'Denied',
+          camError: 'Error',
+          modeText: 'TinyFace + Expressions',
+          stepRuntime: 'Preparing TensorFlow runtime',
+          stepDetector: 'Loading Tiny Face Detector',
+          stepLandmarks: 'Loading face landmarks',
+          stepExpressions: 'Loading emotion model',
+          stepCamera: 'Opening camera stream',
+          stepVideo: 'Starting live video',
+          stepDone: 'System ready',
+          permissionHint: 'Please allow camera access and make sure the page is running over HTTPS.',
+          dominantAbove: 'dominant',
+          facesDetected: 'faces detected'
+        },
+        ar: {
+          dir: 'rtl',
+          appSubtitle: 'تحليل مشاعر لحظي بتتبّع متعدد للوجوه بواجهة مستقبلية فاخرة.',
+          statusInit: 'جاري التهيئة...',
+          statusLoading: 'جاري تحميل النماذج...',
+          statusReady: 'التحليل اللحظي شغّال',
+          statusError: 'مطلوب إجراء',
+          capture: '📸 التقاط صورة',
+          record: '⏺ تسجيل',
+          stopRecord: '⏹ إيقاف التسجيل',
+          retry: '↻ إعادة تشغيل الكاميرا',
+          voiceOn: '🔊 الصوت: تشغيل',
+          voiceOff: '🔇 الصوت: إيقاف',
+          faces: 'الوجوه',
+          analysis: 'التحليل',
+          camera: 'الكاميرا',
+          mode: 'الوضع',
+          waiting: 'انتظار',
+          ready: 'جاهزة',
+          panelTitle: 'تفصيل المشاعر المباشر',
+          panelHint: 'أشرطة النسب مرتبة تنازليًا لكل وجه',
+          emptyTitle: 'لسه مفيش وجوه متكتشفة',
+          emptyDesc: 'وجّه الكاميرا لوجه واحد أو أكتر علشان يبدأ التحليل اللحظي للمشاعر.',
+          footerNote: 'الإشعارات الصوتية بتشتغل فقط عند الثقة العالية جدًا لتجنّب الإزعاج.',
+          metricTopMood: 'أعلى شعور',
+          metricTopConf: 'أعلى ثقة',
+          metricSpeech: 'الصوت',
+          speechReady: 'جاهز',
+          speechMuted: 'صامت',
+          loadingTitle: 'جاري تشغيل Emotion AI PRO MAX',
+          loadingDesc: 'جاري تجهيز النماذج العصبية، الكاميرا، ومحرك العرض اللحظي.',
+          errorTitle: 'خطأ في الكاميرا أو تحميل النموذج',
+          retryInline: 'إعادة المحاولة',
+          face: 'وجه',
+          confidence: 'الثقة',
+          savedPhoto: 'تم تنزيل الصورة بصيغة PNG',
+          savedVideo: 'تم حفظ الفيديو المسجل',
+          recording: 'جاري التسجيل...',
+          noRecorder: 'التسجيل غير مدعوم في المتصفح ده.',
+          camLive: 'مباشر',
+          camDenied: 'مرفوض',
+          camError: 'خطأ',
+          modeText: 'كشف سريع + مشاعر',
+          stepRuntime: 'تجهيز محرك TensorFlow',
+          stepDetector: 'تحميل كاشف الوجوه السريع',
+          stepLandmarks: 'تحميل نقاط الوجه',
+          stepExpressions: 'تحميل نموذج المشاعر',
+          stepCamera: 'فتح بث الكاميرا',
+          stepVideo: 'تشغيل الفيديو المباشر',
+          stepDone: 'النظام جاهز',
+          permissionHint: 'اسمح بالوصول للكاميرا وتأكد إن الصفحة شغالة على HTTPS.',
+          dominantAbove: 'المسيطر',
+          facesDetected: 'وجوه متكتشفة'
+        }
+      };
 
-  const pct = Math.round(dom.score * 100);
-  let text;
-  if (lang === 'ar') {
-    text = `الوجه ${faces.length > 1 ? 'الأول ' : ''}يبدو ${EMOTIONS_AR[dom.emotion] || dom.emotion} بنسبة ${pct} بالمائة`;
-  } else {
-    text = `Face ${faces.length > 1 ? 'one ' : ''}appears ${dom.emotion} at ${pct} percent confidence`;
-  }
+      const EMOTION_LABELS = {
+        en: {
+          happy: 'Happy',
+          sad: 'Sad',
+          angry: 'Angry',
+          surprised: 'Surprised',
+          neutral: 'Neutral',
+          fearful: 'Fearful',
+          disgusted: 'Disgusted'
+        },
+        ar: {
+          happy: 'سعيد',
+          sad: 'حزين',
+          angry: 'غاضب',
+          surprised: 'متفاجئ',
+          neutral: 'محايد',
+          fearful: 'خائف',
+          disgusted: 'مشمئز'
+        }
+      };
 
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = lang === 'ar' ? 'ar-EG' : 'en-US';
-  utter.rate = 0.9;
-  utter.pitch = 1.1;
+      const els = {
+        body: document.body,
+        langToggle: document.getElementById('langToggle'),
+        captureBtn: document.getElementById('captureBtn'),
+        recordBtn: document.getElementById('recordBtn'),
+        retryBtn: document.getElementById('retryBtn'),
+        retryInlineBtn: document.getElementById('retryInlineBtn'),
+        voiceBtn: document.getElementById('voiceBtn'),
+        camera: document.getElementById('camera'),
+        overlay: document.getElementById('overlay'),
+        stage: document.getElementById('stage'),
+        faceList: document.getElementById('faceList'),
+        emptyState: document.getElementById('emptyState'),
+        loadingOverlay: document.getElementById('loadingOverlay'),
+        errorOverlay: document.getElementById('errorOverlay'),
+        progressBar: document.getElementById('progressBar'),
+        progressStep: document.getElementById('progressStep'),
+        progressPct: document.getElementById('progressPct'),
+        loadingTitle: document.getElementById('loadingTitle'),
+        loadingDesc: document.getElementById('loadingDesc'),
+        errorTitle: document.getElementById('errorTitle'),
+        errorMessage: document.getElementById('errorMessage'),
+        statusText: document.getElementById('statusText'),
+        appSubtitle: document.getElementById('appSubtitle'),
+        facesLabel: document.getElementById('facesLabel'),
+        fpsLabel: document.getElementById('fpsLabel'),
+        cameraStateLabel: document.getElementById('cameraStateLabel'),
+        modeLabel: document.getElementById('modeLabel'),
+        panelTitle: document.getElementById('panelTitle'),
+        panelHint: document.getElementById('panelHint'),
+        emptyTitle: document.getElementById('emptyTitle'),
+        emptyDesc: document.getElementById('emptyDesc'),
+        footerNote: document.getElementById('footerNote'),
+        faceCount: document.getElementById('faceCount'),
+        fpsValue: document.getElementById('fpsValue'),
+        cameraState: document.getElementById('cameraState'),
+        modeValue: document.getElementById('modeValue'),
+        metricDominant: document.getElementById('metricDominant'),
+        metricConfidence: document.getElementById('metricConfidence'),
+        metricSpeech: document.getElementById('metricSpeech'),
+        metricDomLabel: document.getElementById('metricDomLabel'),
+        metricConfLabel: document.getElementById('metricConfLabel'),
+        metricSpeechLabel: document.getElementById('metricSpeechLabel')
+      };
 
-  // Prefer Arabic voice
-  const voices = speechSynthesis.getVoices();
-  const preferred = voices.find(v => v.lang.startsWith(lang === 'ar' ? 'ar' : 'en') && v.localService);
-  if (preferred) utter.voice = preferred;
+      const state = {
+        lang: (navigator.language || '').toLowerCase().startsWith('ar') ? 'ar' : 'en',
+        stream: null,
+        recorderStream: null,
+        mediaRecorder: null,
+        chunks: [],
+        recordingCanvas: document.createElement('canvas'),
+        recordingCtx: null,
+        overlayCtx: null,
+        dpr: Math.min(window.devicePixelRatio || 1, 2),
+        ready: false,
+        voicesEnabled: true,
+        renderFaces: [],
+        detections: [],
+        detectionLoopTimer: null,
+        detectionBusy: false,
+        rafId: null,
+        lastDetectionMs: 0,
+        fpsSamples: [],
+        fps: 0,
+        voices: [],
+        lastSpokenAt: 0,
+        lastSpokenSignature: '',
+        lastSpeechUiAt: 0,
+        isRecording: false
+      };
 
-  showVoiceToast(text);
-  speechSynthesis.speak(utter);
-}
+      const isMobile = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+      const DETECTION_INTERVAL = isMobile ? 180 : 130;
+      const DETECTOR_INPUT = isMobile ? 160 : 224;
+      const VOICE_THRESHOLD = 0.85;
+      const VOICE_COOLDOWN = 6500;
+      const SAME_SIGNATURE_COOLDOWN = 12000;
 
-function showVoiceToast(text) {
-  const toast = document.getElementById('voice-toast');
-  toast.textContent = `🔊 ${text.substring(0, 40)}${text.length > 40 ? '…' : ''}`;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
+      function t(key) {
+        return I18N[state.lang][key] || key;
+      }
 
-// ═══════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════
-function getDominant(expressions) {
-  let best = { emotion: 'neutral', score: 0 };
-  Object.entries(expressions).forEach(([emotion, score]) => {
-    if (score > best.score) best = { emotion, score };
-  });
-  return best;
-}
+      function emotionLabel(key) {
+        return (EMOTION_LABELS[state.lang] && EMOTION_LABELS[state.lang][key]) || key;
+      }
 
-function sortEmotions(expressions) {
-  return Object.entries(expressions)
-    .map(([emotion, score]) => ({ emotion, score }))
-    .sort((a, b) => b.score - a.score);
-}
+      function setLanguage(lang) {
+        state.lang = lang;
+        const pack = I18N[lang];
+        document.documentElement.lang = lang;
+        document.documentElement.dir = pack.dir;
+        els.body.classList.toggle('ar', lang === 'ar');
 
-// ═══════════════════════════════════════════════
-// CONTROLS
-// ═══════════════════════════════════════════════
-function toggleLang() {
-  lang = lang === 'en' ? 'ar' : 'en';
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.getElementById('lang-btn').textContent = lang === 'ar' ? 'EN' : 'عربي';
-  // Reset last spoken to allow re-speak in new language
-  lastSpokenEmotion = '';
-  lastVoiceTime = 0;
-}
+        els.langToggle.textContent = lang === 'ar' ? 'EN' : 'AR';
+        els.captureBtn.textContent = t('capture');
+        els.recordBtn.textContent = state.isRecording ? t('stopRecord') : t('record');
+        els.retryBtn.textContent = t('retry');
+        els.retryInlineBtn.textContent = t('retryInline');
+        els.voiceBtn.textContent = state.voicesEnabled ? t('voiceOn') : t('voiceOff');
+        els.appSubtitle.textContent = t('appSubtitle');
+        els.facesLabel.textContent = t('faces');
+        els.fpsLabel.textContent = t('analysis');
+        els.cameraStateLabel.textContent = t('camera');
+        els.modeLabel.textContent = t('mode');
+        els.panelTitle.textContent = t('panelTitle');
+        els.panelHint.textContent = t('panelHint');
+        els.emptyTitle.textContent = t('emptyTitle');
+        els.emptyDesc.textContent = t('emptyDesc');
+        els.footerNote.textContent = t('footerNote');
+        els.loadingTitle.textContent = t('loadingTitle');
+        els.loadingDesc.textContent = t('loadingDesc');
+        els.errorTitle.textContent = t('errorTitle');
+        els.metricDomLabel.textContent = t('metricTopMood');
+        els.metricConfLabel.textContent = t('metricTopConf');
+        els.metricSpeechLabel.textContent = t('metricSpeech');
+        els.modeValue.textContent = t('modeText');
 
-function toggleVoice() {
-  voiceEnabled = !voiceEnabled;
-  const btn = document.getElementById('voice-btn');
-  const chip = document.getElementById('voice-status-chip');
-  if (voiceEnabled) {
-    btn.textContent = '🔊';
-    btn.classList.remove('active');
-    chip.style.display = 'none';
-  } else {
-    btn.textContent = '🔇';
-    btn.classList.add('active');
-    chip.style.display = 'none';
-    speechSynthesis.cancel();
-  }
-}
+        setStatus(state.ready ? t('statusReady') : t('statusInit'));
+        renderFaceList(state.detections);
+        updateMetrics();
+      }
 
-function takePhoto() {
-  const flash = document.getElementById('flash');
+      function setStatus(text) {
+        els.statusText.textContent = text;
+      }
 
-  // Flash effect
-  flash.style.transition = 'none';
-  flash.style.opacity = '0.8';
-  setTimeout(() => {
-    flash.style.transition = 'opacity 0.5s ease';
-    flash.style.opacity = '0';
-  }, 80);
+      function setCameraState(text) {
+        els.cameraState.textContent = text;
+      }
 
-  // Capture
-  const snap = document.createElement('canvas');
-  snap.width = videoEl.videoWidth;
-  snap.height = videoEl.videoHeight;
-  const sc = snap.getContext('2d');
-  sc.save();
-  sc.translate(snap.width, 0);
-  sc.scale(-1, 1);
-  sc.drawImage(videoEl, 0, 0);
-  sc.restore();
+      function showError(message) {
+        els.errorMessage.textContent = message || t('permissionHint');
+        els.errorOverlay.classList.remove('hidden');
+        setStatus(t('statusError'));
+      }
 
-  // Overlay the detection canvas on top
-  sc.drawImage(canvasEl, 0, 0, snap.width, snap.height);
+      function hideError() {
+        els.errorOverlay.classList.add('hidden');
+      }
 
-  snap.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `emotion-ai-${Date.now()}.png`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }, 'image/png');
-}
+      function showLoading() {
+        els.loadingOverlay.classList.remove('hidden');
+      }
 
-function toggleRecord() {
-  if (!isRecording) {
-    startRecording();
-  } else {
-    stopRecording();
-  }
-}
+      function hideLoading() {
+        els.loadingOverlay.classList.add('hidden');
+      }
 
-function startRecording() {
-  const stream = videoEl.srcObject;
-  if (!stream) return;
+      function updateProgress(progress, stepText) {
+        const safe = Math.max(0, Math.min(100, progress));
+        els.progressBar.style.width = safe + '%';
+        els.progressPct.textContent = Math.round(safe) + '%';
+        els.progressStep.textContent = stepText;
+      }
 
-  recordedChunks = [];
-  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9'
-    : MediaRecorder.isTypeSupported('video/webm')
-    ? 'video/webm'
-    : 'video/mp4';
+      function formatPercent(value) {
+        const locale = state.lang === 'ar' ? 'ar-EG' : 'en-US';
+        return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value * 100) + '%';
+      }
 
-  try {
-    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-  } catch(e) {
-    mediaRecorder = new MediaRecorder(stream);
-  }
+      function normalizeExpressions(input = {}) {
+        const out = {};
+        for (const k of EMOTION_KEYS) out[k] = Math.max(0, Math.min(1, Number(input[k] || 0)));
+        return out;
+      }
 
-  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = saveVideo;
-  mediaRecorder.start(100);
+      function sortExpressions(expressions) {
+        const normalized = normalizeExpressions(expressions);
+        return Object.entries(normalized).sort((a, b) => b[1] - a[1]);
+      }
 
-  isRecording = true;
-  document.getElementById('record-btn').textContent = '⏹';
-  document.getElementById('record-btn').classList.add('danger');
-  document.getElementById('rec-indicator').classList.add('show');
-}
+      function getDominantEmotion(expressions) {
+        const sorted = sortExpressions(expressions);
+        return sorted[0] || ['neutral', 0];
+      }
 
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-  }
-  isRecording = false;
-  document.getElementById('record-btn').textContent = '⏺';
-  document.getElementById('record-btn').classList.remove('danger');
-  document.getElementById('rec-indicator').classList.remove('show');
-}
+      function describeMood(expressions) {
+        const e = normalizeExpressions(expressions);
+        const [topEmotion, topValue] = getDominantEmotion(e);
 
-function saveVideo() {
-  if (!recordedChunks.length) return;
-  const mime = recordedChunks[0].type || 'video/webm';
-  const blob = new Blob(recordedChunks, { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `emotion-ai-recording-${Date.now()}.webm`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
-}
+        if (topValue < 0.32) {
+          return state.lang === 'ar'
+            ? 'التعبير لسه مختلط ولسه بيتكوّن بشكل أوضح.'
+            : 'The expression is mixed and still forming.';
+        }
 
-function togglePanel() {
-  const panel = document.getElementById('side-panel');
-  panelOpen = !panelOpen;
-  panel.classList.toggle('open', panelOpen);
-}
+        if (e.happy > 0.60 && e.surprised > 0.18) {
+          return state.lang === 'ar'
+            ? 'واضح إن فيه سعادة مع اندهاش لطيف ومشاعر إيجابية قوية.'
+            : 'You look delighted, energized, and pleasantly surprised.';
+        }
 
-// Pre-load voices
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-}
+        if (e.happy > 0.30 && e.fearful > 0.28) {
+          return state.lang === 'ar'
+            ? 'شكلك بتحاول تبتسم، لكن لسه فيه توتر أو قلق بسيط ظاهر.'
+            : 'You look slightly nervous but still trying to smile.';
+        }
 
-// ═══════════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  // Wait for face-api.js to be defined
-  const waitForLib = setInterval(() => {
-    if (typeof faceapi !== 'undefined') {
-      clearInterval(waitForLib);
+        if (e.neutral > 0.68) {
+          return state.lang === 'ar'
+            ? 'ملامحك هادئة ومتزنة، وفيها ثبات وتحكم واضح.'
+            : 'You look calm, steady, and in control.';
+        }
+
+        if (e.sad > 0.46 && e.neutral > 0.16) {
+          return state.lang === 'ar'
+            ? 'باين عليك هدوء ممزوج بشيء من الحزن أو التفكير الداخلي.'
+            : 'You look a little down and reflective right now.';
+        }
+
+        if (e.angry > 0.48 && e.disgusted > 0.12) {
+          return state.lang === 'ar'
+            ? 'فيه انزعاج واضح وحدّة في التعبير، كأنك غير مقتنع أو متضايق.'
+            : 'You look frustrated, intense, and somewhat unconvinced.';
+        }
+
+        if (e.fearful > 0.48) {
+          return state.lang === 'ar'
+            ? 'فيه حذر وتوتر ظاهر، كأنك متأهب أو قلق من شيء.'
+            : 'You look tense, cautious, and highly alert.';
+        }
+
+        if (e.surprised > 0.56) {
+          return state.lang === 'ar'
+            ? 'واضح إنك متفاجئ جدًا ومركز بقوة في اللحظة دي.'
+            : 'You look caught off guard and very alert.';
+        }
+
+        if (e.disgusted > 0.40) {
+          return state.lang === 'ar'
+            ? 'فيه شعور بالرفض أو عدم الارتياح ظاهر على الملامح.'
+            : 'You look uncomfortable or unconvinced by what you see.';
+        }
+
+        if (e.happy > 0.56) {
+          return state.lang === 'ar'
+            ? 'المزاج العام إيجابي، وفيه راحة وابتسامة واضحة.'
+            : 'You look genuinely upbeat, relaxed, and positive.';
+        }
+
+        if (e.angry > 0.48) {
+          return state.lang === 'ar'
+            ? 'فيه انفعال وحدّة واضحة في التعبير الحالي.'
+            : 'You look intense and emotionally charged right now.';
+        }
+
+        if (e.sad > 0.50) {
+          return state.lang === 'ar'
+            ? 'فيه هبوط في المزاج أو شعور بالحزن ظاهر على الوجه.'
+            : 'You look emotionally heavy and a bit low right now.';
+        }
+
+        const second = sortExpressions(e)[1] || ['neutral', 0];
+        if (state.lang === 'ar') {
+          return `أقرب قراءة حالية: ${emotionLabel(topEmotion)} مع لمسة خفيفة من ${emotionLabel(second[0])}.`;
+        }
+        return `Current read: mostly ${emotionLabel(topEmotion).toLowerCase()} with a hint of ${emotionLabel(second[0]).toLowerCase()}.`;
+      }
+
+      function updateMetrics() {
+        const best = state.detections[0]
+          ? state.detections
+              .map(d => ({ dominant: getDominantEmotion(d.expressions) }))
+              .sort((a, b) => b.dominant[1] - a.dominant[1])[0]
+          : null;
+
+        els.faceCount.textContent = String(state.detections.length);
+        els.fpsValue.textContent = `${Math.round(state.fps)} fps`;
+        els.metricDominant.textContent = best ? emotionLabel(best.dominant[0]) : '—';
+        els.metricConfidence.textContent = best ? formatPercent(best.dominant[1]) : '0%';
+        els.metricSpeech.textContent = state.voicesEnabled ? t('speechReady') : t('speechMuted');
+        els.emptyState.style.display = state.detections.length ? 'none' : 'grid';
+      }
+
+      function coverMetrics(containerW, containerH, sourceW, sourceH) {
+        const scale = Math.max(containerW / sourceW, containerH / sourceH);
+        const drawW = sourceW * scale;
+        const drawH = sourceH * scale;
+        const offsetX = (containerW - drawW) / 2;
+        const offsetY = (containerH - drawH) / 2;
+        return { scale, drawW, drawH, offsetX, offsetY };
+      }
+
+      function sourceCropForCover(containerW, containerH, sourceW, sourceH) {
+        const scale = Math.max(containerW / sourceW, containerH / sourceH);
+        const cropW = containerW / scale;
+        const cropH = containerH / scale;
+        const sx = (sourceW - cropW) / 2;
+        const sy = (sourceH - cropH) / 2;
+        return { sx, sy, cropW, cropH };
+      }
+
+      function resizeCanvasToStage() {
+        const rect = els.stage.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        state.dpr = dpr;
+
+        const w = Math.max(1, Math.round(rect.width));
+        const h = Math.max(1, Math.round(rect.height));
+
+        if (els.overlay.width !== Math.round(w * dpr) || els.overlay.height !== Math.round(h * dpr)) {
+          els.overlay.width = Math.round(w * dpr);
+          els.overlay.height = Math.round(h * dpr);
+          els.overlay.style.width = w + 'px';
+          els.overlay.style.height = h + 'px';
+          state.overlayCtx = els.overlay.getContext('2d');
+          state.overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        if (state.recordingCanvas.width !== w || state.recordingCanvas.height !== h) {
+          state.recordingCanvas.width = w;
+          state.recordingCanvas.height = h;
+          state.recordingCtx = state.recordingCanvas.getContext('2d');
+        }
+      }
+
+      function mapBoxToStage(box) {
+        const rect = els.stage.getBoundingClientRect();
+        const vw = els.camera.videoWidth || 1;
+        const vh = els.camera.videoHeight || 1;
+        const { scale, offsetX, offsetY } = coverMetrics(rect.width, rect.height, vw, vh);
+
+        return {
+          x: rect.width - (box.x + box.width) * scale + offsetX, // mirror for selfie camera
+          y: box.y * scale + offsetY,
+          width: box.width * scale,
+          height: box.height * scale
+        };
+      }
+
+      function syncRenderFaces(detections) {
+        for (let i = 0; i < detections.length; i++) {
+          const detection = detections[i];
+          const mapped = mapBoxToStage(detection.detection.box);
+          const [dominant, confidence] = getDominantEmotion(detection.expressions);
+          const mood = describeMood(detection.expressions);
+
+          if (!state.renderFaces[i]) {
+            state.renderFaces[i] = {
+              x: mapped.x,
+              y: mapped.y,
+              width: mapped.width,
+              height: mapped.height,
+              targetX: mapped.x,
+              targetY: mapped.y,
+              targetWidth: mapped.width,
+              targetHeight: mapped.height,
+              alpha: 0,
+              active: true,
+              expressions: normalizeExpressions(detection.expressions),
+              dominant,
+              confidence,
+              mood
+            };
+          }
+
+          const face = state.renderFaces[i];
+          face.targetX = mapped.x;
+          face.targetY = mapped.y;
+          face.targetWidth = mapped.width;
+          face.targetHeight = mapped.height;
+          face.active = true;
+          face.expressions = normalizeExpressions(detection.expressions);
+          face.dominant = dominant;
+          face.confidence = confidence;
+          face.mood = mood;
+        }
+
+        for (let i = detections.length; i < state.renderFaces.length; i++) {
+          if (state.renderFaces[i]) state.renderFaces[i].active = false;
+        }
+      }
+
+      function roundedRect(ctx, x, y, w, h, r) {
+        const rr = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + rr, y);
+        ctx.arcTo(x + w, y, x + w, y + h, rr);
+        ctx.arcTo(x + w, y + h, x, y + h, rr);
+        ctx.arcTo(x, y + h, x, y, rr);
+        ctx.arcTo(x, y, x + w, y, rr);
+        ctx.closePath();
+      }
+
+      function drawOverlayFrame(time) {
+        resizeCanvasToStage();
+
+        const rect = els.stage.getBoundingClientRect();
+        const ctx = state.overlayCtx;
+        if (!ctx) {
+          state.rafId = requestAnimationFrame(drawOverlayFrame);
+          return;
+        }
+
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const nextRenderFaces = [];
+
+        for (let i = 0; i < state.renderFaces.length; i++) {
+          const f = state.renderFaces[i];
+          if (!f) continue;
+
+          const speed = 0.18;
+          f.x += (f.targetX - f.x) * speed;
+          f.y += (f.targetY - f.y) * speed;
+          f.width += (f.targetWidth - f.width) * speed;
+          f.height += (f.targetHeight - f.height) * speed;
+          f.alpha += ((f.active ? 1 : 0) - f.alpha) * 0.15;
+
+          if (f.alpha < 0.03 && !f.active) continue;
+
+          const color = EMOTION_COLORS[f.dominant] || EMOTION_COLORS.neutral;
+          const pulse = 0.85 + Math.sin((time * 0.004) + i) * 0.15;
+          const x = f.x;
+          const y = f.y;
+          const w = f.width;
+          const h = f.height;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(1, f.alpha));
+
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 18 + 18 * pulse;
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = color;
+          roundedRect(ctx, x, y, w, h, 18);
+          ctx.stroke();
+
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = Math.max(0, Math.min(1, f.alpha * 0.16));
+          ctx.fillStyle = color;
+          roundedRect(ctx, x, y, w, h, 18);
+          ctx.fill();
+
+          ctx.globalAlpha = Math.max(0, Math.min(1, f.alpha));
+          const pct = Math.round(f.confidence * 100);
+          const label = `${emotionLabel(f.dominant)} ${pct}%`;
+          ctx.font = isMobile ? '700 13px Inter, Arial, sans-serif' : '700 14px Inter, Arial, sans-serif';
+          const textWidth = ctx.measureText(label).width;
+          const padX = 12;
+          const labelW = textWidth + padX * 2;
+          const labelH = 34;
+          const labelX = Math.max(8, Math.min(rect.width - labelW - 8, x));
+          const labelY = y > 46 ? y - 42 : y + 10;
+
+          ctx.fillStyle = 'rgba(4, 10, 25, 0.85)';
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 22;
+          roundedRect(ctx, labelX, labelY, labelW, labelH, 999);
+          ctx.fill();
+
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+          ctx.lineWidth = 1;
+          roundedRect(ctx, labelX, labelY, labelW, labelH, 999);
+          ctx.stroke();
+
+          ctx.fillStyle = '#f6fcff';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, labelX + padX, labelY + labelH / 2);
+
+          ctx.restore();
+
+          nextRenderFaces.push(f);
+        }
+
+        state.renderFaces = nextRenderFaces;
+        drawRecordingComposite(rect.width, rect.height);
+        state.rafId = requestAnimationFrame(drawOverlayFrame);
+      }
+
+      function drawRecordingComposite(w, h) {
+        const ctx = state.recordingCtx;
+        if (!ctx || !els.camera.videoWidth || !els.camera.videoHeight) return;
+
+        const vw = els.camera.videoWidth;
+        const vh = els.camera.videoHeight;
+        const crop = sourceCropForCover(w, h, vw, vh);
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(
+          els.camera,
+          crop.sx, crop.sy, crop.cropW, crop.cropH,
+          0, 0, w, h
+        );
+        ctx.restore();
+        ctx.drawImage(els.overlay, 0, 0, w, h);
+      }
+
+      function renderFaceList(detections) {
+        if (!detections.length) {
+          updateMetrics();
+          return;
+        }
+
+        const html = detections.map((item, idx) => {
+          const dominant = getDominantEmotion(item.expressions);
+          const mood = describeMood(item.expressions);
+          const rows = sortExpressions(item.expressions)
+            .map(([emotion, value]) => `
+              <div class="bar-row">
+                <div class="bar-label">${emotionLabel(emotion)}</div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="--c:${EMOTION_COLORS[emotion] || '#48f3ff'}; width:${(value * 100).toFixed(1)}%"></div>
+                </div>
+                <div class="bar-value">${formatPercent(value)}</div>
+              </div>
+            `).join('');
+
+          return `
+            <article class="face-card">
+              <div class="face-head">
+                <div class="face-index">
+                  <span class="face-orb"></span>
+                  <span>${t('face')} ${idx + 1}</span>
+                </div>
+                <div class="face-dominant">
+                  <div class="emotion-tag" style="box-shadow:0 0 24px ${EMOTION_COLORS[dominant[0]] || '#48f3ff'}22">
+                    ${emotionLabel(dominant[0])}
+                    <strong>${formatPercent(dominant[1])}</strong>
+                  </div>
+                  <small>${t('confidence')}</small>
+                </div>
+              </div>
+              <p class="mood-text">${mood}</p>
+              <div class="bars">${rows}</div>
+            </article>
+          `;
+        }).join('');
+
+        els.faceList.innerHTML = html;
+        updateMetrics();
+      }
+
+      function loadVoices() {
+        if (!('speechSynthesis' in window)) return;
+        state.voices = window.speechSynthesis.getVoices() || [];
+      }
+
+      function pickBestVoice() {
+        if (!('speechSynthesis' in window)) return null;
+        if (!state.voices.length) loadVoices();
+
+        const voices = state.voices || [];
+        if (!voices.length) return null;
+
+        if (state.lang === 'ar') {
+          return (
+            voices.find(v => /ar[-_]?eg/i.test(v.lang) || /Arabic|Omar|Tarik|Maged|Laila/i.test(v.name)) ||
+            voices.find(v => /^ar/i.test(v.lang)) ||
+            voices[0]
+          );
+        }
+
+        return (
+          voices.find(v => /^en[-_](US|GB)/i.test(v.lang)) ||
+          voices.find(v => /^en/i.test(v.lang)) ||
+          voices[0]
+        );
+      }
+
+      function speakForDetections(detections) {
+        if (!state.voicesEnabled) return;
+        if (!('speechSynthesis' in window)) return;
+        if (!detections.length) return;
+
+        const best = detections
+          .map((d, idx) => {
+            const [emotion, confidence] = getDominantEmotion(d.expressions);
+            return { idx, emotion, confidence, expressions: d.expressions };
+          })
+          .sort((a, b) => b.confidence - a.confidence)[0];
+
+        if (!best || best.confidence < VOICE_THRESHOLD) return;
+
+        const now = Date.now();
+        const signature = `${best.emotion}:${Math.round(best.confidence * 100)}:${detections.length}`;
+
+        if (now - state.lastSpokenAt < VOICE_COOLDOWN) return;
+        if (signature === state.lastSpokenSignature && now - state.lastSpokenAt < SAME_SIGNATURE_COOLDOWN) return;
+
+        const voice = pickBestVoice();
+        const mood = describeMood(best.expressions);
+        const pct = Math.round(best.confidence * 100);
+
+        const text = state.lang === 'ar'
+          ? `أقوى شعور ظاهر هو ${emotionLabel(best.emotion)} بنسبة ${pct} بالمية. ${mood}`
+          : `Detected dominant emotion is ${emotionLabel(best.emotion)} at ${pct} percent. ${mood}`;
+
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = state.lang === 'ar' ? 'ar-EG' : 'en-US';
+        utter.rate = state.lang === 'ar' ? 1.0 : 0.98;
+        utter.pitch = 1.02;
+        utter.volume = 1;
+
+        if (voice) utter.voice = voice;
+
+        try {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(utter);
+          state.lastSpokenAt = now;
+          state.lastSpokenSignature = signature;
+          state.lastSpeechUiAt = now;
+          updateMetrics();
+        } catch (_) {}
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function capturePhoto() {
+        if (!state.ready || !els.camera.videoWidth) return;
+
+        resizeCanvasToStage();
+        drawRecordingComposite(state.recordingCanvas.width, state.recordingCanvas.height);
+
+        state.recordingCanvas.toBlob((blob) => {
+          if (!blob) return;
+          const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+          downloadBlob(blob, `emotion-ai-photo-${stamp}.png`);
+          setStatus(t('savedPhoto'));
+        }, 'image/png');
+      }
+
+      function getRecorderMimeType() {
+        if (!window.MediaRecorder) return '';
+        const types = [
+          'video/mp4;codecs=h264,aac',
+          'video/webm;codecs=vp9,opus',
+          'video/webm;codecs=vp8,opus',
+          'video/webm'
+        ];
+        return types.find(type => MediaRecorder.isTypeSupported(type)) || '';
+      }
+
+      function startRecording() {
+        if (!state.ready) return;
+
+        if (!window.MediaRecorder) {
+          setStatus(t('noRecorder'));
+          return;
+        }
+
+        resizeCanvasToStage();
+
+        const stream = state.recordingCanvas.captureStream(isMobile ? 24 : 30);
+        const mimeType = getRecorderMimeType();
+        let recorder;
+
+        try {
+          recorder = mimeType
+            ? new MediaRecorder(stream, { mimeType })
+            : new MediaRecorder(stream);
+        } catch (_) {
+          setStatus(t('noRecorder'));
+          return;
+        }
+
+        state.chunks = [];
+        state.mediaRecorder = recorder;
+        state.recorderStream = stream;
+
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) state.chunks.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(state.chunks, { type: recorder.mimeType || 'video/webm' });
+          const ext = (recorder.mimeType || '').includes('mp4') ? 'mp4' : 'webm';
+          const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+          downloadBlob(blob, `emotion-ai-recording-${stamp}.${ext}`);
+          state.isRecording = false;
+          els.recordBtn.textContent = t('record');
+          setStatus(t('savedVideo'));
+
+          if (state.recorderStream) {
+            state.recorderStream.getTracks().forEach(track => track.stop());
+            state.recorderStream = null;
+          }
+        };
+
+        recorder.start(300);
+        state.isRecording = true;
+        els.recordBtn.textContent = t('stopRecord');
+        setStatus(t('recording'));
+      }
+
+      function stopRecording() {
+        if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+          state.mediaRecorder.stop();
+        } else {
+          state.isRecording = false;
+          els.recordBtn.textContent = t('record');
+        }
+      }
+
+      function toggleRecording() {
+        if (state.isRecording) stopRecording();
+        else startRecording();
+      }
+
+      function stopCamera() {
+        if (state.stream) {
+          state.stream.getTracks().forEach(track => track.stop());
+          state.stream = null;
+        }
+        els.camera.srcObject = null;
+      }
+
+      async function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Camera API is not supported in this browser.');
+        }
+
+        stopCamera();
+
+        const constraints = {
+          audio: false,
+          video: {
+            facingMode: 'user',
+            width: { ideal: isMobile ? 960 : 1280 },
+            height: { ideal: isMobile ? 720 : 720 },
+            frameRate: { ideal: isMobile ? 24 : 30, max: isMobile ? 30 : 60 }
+          }
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        state.stream = stream;
+        els.camera.srcObject = stream;
+
+        await new Promise((resolve) => {
+          const onReady = async () => {
+            try { await els.camera.play(); } catch (_) {}
+            resolve();
+          };
+
+          if (els.camera.readyState >= 1) onReady();
+          else els.camera.onloadedmetadata = onReady;
+        });
+
+        resizeCanvasToStage();
+        setCameraState(t('camLive'));
+      }
+
+      async function loadModels() {
+        setStatus(t('statusLoading'));
+
+        updateProgress(10, t('stepRuntime'));
+        try {
+          await tf.setBackend('webgl');
+        } catch (_) {}
+        await tf.ready();
+
+        updateProgress(32, t('stepDetector'));
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+
+        updateProgress(56, t('stepLandmarks'));
+        await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+
+        updateProgress(82, t('stepExpressions'));
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+
+        updateProgress(100, t('stepDone'));
+      }
+
+      async function detectFrame() {
+        if (!state.ready) return;
+        if (state.detectionBusy) return;
+        if (document.hidden) return;
+        if (!els.camera.videoWidth || els.camera.readyState < 2) return;
+
+        state.detectionBusy = true;
+        const started = performance.now();
+
+        try {
+          const options = new faceapi.TinyFaceDetectorOptions({
+            inputSize: DETECTOR_INPUT,
+            scoreThreshold: isMobile ? 0.42 : 0.40
+          });
+
+          const results = await faceapi
+            .detectAllFaces(els.camera, options)
+            .withFaceLandmarks(true)
+            .withFaceExpressions();
+
+          const filtered = (results || [])
+            .filter(r => r && r.detection && r.detection.score > 0.35)
+            .sort((a, b) => a.detection.box.x - b.detection.box.x)
+            .slice(0, 8);
+
+          state.detections = filtered;
+          syncRenderFaces(filtered);
+          renderFaceList(filtered);
+          speakForDetections(filtered);
+
+          const elapsed = performance.now() - started;
+          state.lastDetectionMs = elapsed;
+          const instFps = 1000 / Math.max(elapsed, 1);
+          state.fpsSamples.push(instFps);
+          if (state.fpsSamples.length > 12) state.fpsSamples.shift();
+          state.fps = state.fpsSamples.reduce((a, b) => a + b, 0) / state.fpsSamples.length;
+        } catch (err) {
+          console.error('Detection error:', err);
+        } finally {
+          state.detectionBusy = false;
+        }
+      }
+
+      function startDetectionLoop() {
+        stopDetectionLoop();
+        state.detectionLoopTimer = setInterval(detectFrame, DETECTION_INTERVAL);
+      }
+
+      function stopDetectionLoop() {
+        if (state.detectionLoopTimer) {
+          clearInterval(state.detectionLoopTimer);
+          state.detectionLoopTimer = null;
+        }
+      }
+
+      async function boot() {
+        showLoading();
+        hideError();
+
+        try {
+          updateProgress(4, t('stepRuntime'));
+          await loadModels();
+
+          updateProgress(90, t('stepCamera'));
+          await startCamera();
+
+          updateProgress(96, t('stepVideo'));
+          resizeCanvasToStage();
+
+          state.ready = true;
+          els.captureBtn.disabled = false;
+          els.recordBtn.disabled = false;
+          setStatus(t('statusReady'));
+          setCameraState(t('camLive'));
+
+          startDetectionLoop();
+
+          setTimeout(() => {
+            updateProgress(100, t('stepDone'));
+            hideLoading();
+          }, 250);
+        } catch (err) {
+          console.error(err);
+          state.ready = false;
+          els.captureBtn.disabled = true;
+          els.recordBtn.disabled = true;
+
+          let msg = t('permissionHint');
+          const raw = String(err && err.message ? err.message : err || '');
+
+          if (/denied|permission|notallowed/i.test(raw)) {
+            setCameraState(t('camDenied'));
+            msg = t('permissionHint');
+          } else if (/model|load|fetch|network|manifest/i.test(raw)) {
+            setCameraState(t('camError'));
+            msg = state.lang === 'ar'
+              ? 'فشل تحميل نماذج الذكاء الاصطناعي. تحقق من الاتصال بالإنترنت وأعد المحاولة.'
+              : 'Failed to load AI models. Check your internet connection and try again.';
+          } else {
+            setCameraState(t('camError'));
+          }
+
+          showError(msg);
+          hideLoading();
+        }
+      }
+
+      async function retryAll() {
+        stopDetectionLoop();
+        if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+          try { state.mediaRecorder.stop(); } catch (_) {}
+        }
+        state.detections = [];
+        state.renderFaces = [];
+        renderFaceList([]);
+        await boot();
+      }
+
+      function bindEvents() {
+        els.langToggle.addEventListener('click', () => {
+          setLanguage(state.lang === 'ar' ? 'en' : 'ar');
+        });
+
+        els.captureBtn.addEventListener('click', capturePhoto);
+        els.recordBtn.addEventListener('click', toggleRecording);
+        els.retryBtn.addEventListener('click', retryAll);
+        els.retryInlineBtn.addEventListener('click', retryAll);
+
+        els.voiceBtn.addEventListener('click', () => {
+          state.voicesEnabled = !state.voicesEnabled;
+          els.voiceBtn.textContent = state.voicesEnabled ? t('voiceOn') : t('voiceOff');
+          if (!state.voicesEnabled && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+          updateMetrics();
+        });
+
+        window.addEventListener('resize', resizeCanvasToStage, { passive: true });
+        window.addEventListener('orientationchange', () => setTimeout(resizeCanvasToStage, 250), { passive: true });
+
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) resizeCanvasToStage();
+        });
+
+        window.addEventListener('beforeunload', () => {
+          stopDetectionLoop();
+          stopCamera();
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        });
+
+        if ('speechSynthesis' in window) {
+          loadVoices();
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+      }
+
+      function init() {
+        state.recordingCtx = state.recordingCanvas.getContext('2d');
+        resizeCanvasToStage();
+        bindEvents();
+        setLanguage(state.lang);
+        setStatus(t('statusInit'));
+        setCameraState(t('waiting'));
+        els.modeValue.textContent = t('modeText');
+        state.rafId = requestAnimationFrame(drawOverlayFrame);
+        boot();
+      }
+
       init();
-    }
-  }, 100);
-
-  // Close panel on overlay tap
-  document.getElementById('video-zone').addEventListener('click', (e) => {
-    if (panelOpen && window.innerWidth <= 700) {
-      panelOpen = false;
-      document.getElementById('side-panel').classList.remove('open');
-    }
-  });
-});
-</script>
-
+    })();
+  </script>
 </body>
 </html>
+
