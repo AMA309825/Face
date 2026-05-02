@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emotion AI PRO MAX</title>
+    
+    <!-- Fonts: Inter for English, Cairo for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Face-API.js -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #00f2ff; /* Cyber Cyan */
+            --secondary: #bc13fe; /* Neon Purple */
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+            --danger: #ff2a6d;
+            --success: #05ffa1;
+            --font-en: 'Inter', sans-serif;
+            --font-ar: 'Cairo', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: var(--text-main);
+            font-family: var(--font-en);
+            overflow: hidden; /* Prevent scroll on mobile */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Background Animation */
+        .bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
+            z-index: -2;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 10s infinite ease-in-out;
+            z-index: -1;
+        }
+        .orb-1 { width: 300px; height: 300px; background: var(--secondary); top: -50px; left: -50px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--primary); bottom: -100px; right: -100px; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
+        }
+
+        /* Main Container */
+        #app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 100%; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Video & Canvas Layer */
+        .media-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror effect */
+        }
+
+        canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* UI Overlay */
+        .ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Let clicks pass to buttons */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Glass Components */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            pointer-events: auto;
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Mood Description Panel */
+        .mood-panel {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            z-index: 20;
+        }
+        .mood-text {
+            font-size: 1rem;
+            line-height: 1.4;
+            min-height: 1.4em;
+        }
+
+        /* Controls (Bottom) */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding-bottom: 20px;
+            align-items: center;
+        }
+        
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+        .btn-circle:active { transform: scale(0.9); }
+        .btn-record.recording {
+            background: var(--danger);
+            animation: pulse-red 1.5s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 42, 109, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 42, 109, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 42, 109, 0); }
+        }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-text { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* Arabic Overrides */
+        body.rtl { direction: rtl; font-family: var(--font-ar); }
+        body.rtl video { transform: scaleX(1); } /* Un-mirror for Arabic if preferred, usually mirror is standard for selfie */
+        
+        /* Hidden elements */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-msg">Initializing Neural Networks...</div>
+    </div>
+
+    <!-- Background -->
+    <div class="bg-gradient"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div id="app-container">
+        <!-- Media Layer -->
+        <div class="media-layer">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+        </div>
+
+        <!-- UI Layer -->
+        <div class="ui-layer">
+            <!-- Top Bar -->
+            <div class="glass-panel header">
+                <div class="logo">EMOTION AI <span style="font-size:0.6em; opacity:0.7;">PRO MAX</span></div>
+                <button class="lang-btn" id="lang-toggle">AR / EN</button>
+            </div>
+
+            <!-- Dynamic Mood Text -->
+            <div class="glass-panel mood-panel">
+                <div class="mood-text" id="mood-desc">Waiting for face detection...</div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="controls">
+                <button class="btn-circle" id="btn-photo" title="Take Photo">📷</button>
+                <button class="btn-circle btn-record" id="btn-record" title="Record Video">●</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+/**
+ * Emotion AI PRO MAX - Single File Implementation
+ * Architecture:
+ * 1. State Management (Language, UI updates)
+ * 2. AI Engine (FaceAPI.js wrapper)
+ * 3. Render Engine (Canvas drawing with interpolation)
+ * 4. Voice & Logic System
+ */
+
+// --- Configuration & Constants ---
+const CONFIG = {
+    modelPath: 'https://justadudewhohacks.github.io/face-api.js/models', // Reliable CDN for models
+    scoreThreshold: 0.5,
+    voiceConfidenceThreshold: 0.85,
+    voiceDelay: 8000, // ms between voice announcements
+    colors: {
+        primary: '#00f2ff',
+        secondary: '#bc13fe',
+        box: 'rgba(0, 242, 255, 0.5)',
+        text: '#ffffff'
+    }
+};
+
+const TRANSLATIONS = {
+    en: {
+        loading: "Initializing Neural Networks...",
+        camError: "Camera access denied. Please allow permissions.",
+        wait: "Scanning environment...",
+        emotions: {
+            neutral: "Neutral", happy: "Happy", sad: "Sad", angry: "Angry",
+            fearful: "Fearful", disgusted: "Disgusted", surprised: "Surprised"
+        },
+        moods: {
+            neutral: ["Calm and composed.", "A stoic expression.", "Relaxed state."],
+            happy: ["Radiating positivity!", "Great smile detected.", "Joyful vibes."],
+            sad: ["Feeling a bit down?", "Melancholy detected.", "Keep your head up."],
+            angry: ["Intensity detected.", "You look frustrated.", "Take a deep breath."],
+            surprised: ["Caught off guard?", "Wide-eyed wonder.", "Something unexpected?"],
+            fearful: ["Anxiety detected.", "You seem worried.", "It's okay, stay calm."],
+            disgusted: ["Strong disapproval.", "Unpleasant reaction.", "Rejection detected."]
+        }
+    },
+    ar: {
+        loading: "جاري تهيئة الشبكات العصبية...",
+        camError: "تم رفض الوصول للكاميرا. يرجى السماح بالأذونات.",
+        wait: "جاري مسح البيئة...",
+        emotions: {
+            neutral: "محايد", happy: "سعيد", sad: "حزين", angry: "غاضب",
+            fearful: "خائف", disgusted: "مشمئز", surprised: "متفاجئ"
+        },
+        moods: {
+            neutral: ["هادئ ومتزن.", "تعبير جامد.", "حالة استرخاء."],
+            happy: ["تشع بالإيجابية!", "ابتسامة رائعة.", "أجواء مبهجة."],
+            sad: ["شعور بالحزن؟", "تم رصد الكآبة.", "ارفع رأسك عالياً."],
+            angry: ["تم رصد حدة.", "تبدو محبطاً.", "خذ نفساً عميقاً."],
+            surprised: ["مفاجئ؟", "دهشة واضحة.", "شيء غير متوقع؟"],
+            fearful: ["تم رصد قلق.", "تبدو قلقاً.", "لا بأس، اهدأ."],
+            disgusted: ["رفض قوي.", "ردة فعل غير سارة.", "تم رصد اشمئزاز."]
+        }
+    }
+};
+
+// --- Global State ---
+let state = {
+    lang: 'en',
+    isRecording: false,
+    mediaRecorder: null,
+    recordedChunks: [],
+    lastVoiceTime: 0,
+    detections: [], // Stores current smoothed detections
+    rawDetections: [] // Stores latest raw AI output
+};
+
+// --- DOM Elements ---
+const video = document.getElementById('video');
+const canvas = document.getElementById('overlay');
+const ctx = canvas.getContext('2d');
+const loader = document.getElementById('loader');
+const loadingMsg = document.getElementById('loading-msg');
+const moodDesc = document.getElementById('mood-desc');
+const langBtn = document.getElementById('lang-toggle');
+const btnPhoto = document.getElementById('btn-photo');
+const btnRecord = document.getElementById('btn-record');
+
+// --- Initialization ---
+async function init() {
+    try {
+        // Load Models
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(CONFIG.modelPath),
+            faceapi.nets.faceExpressionNet.loadFromUri(CONFIG.modelPath)
+        ]);
+        
+        startVideo();
+    } catch (err) {
+        console.error(err);
+        loadingMsg.innerText = "Error loading AI models. Check connection.";
+        loadingMsg.style.color = "#ff2a6d";
+    }
+}
+
+function startVideo() {
+    navigator.mediaDevices.getUserMedia({ video: {} })
+        .then(stream => {
+            video.srcObject = stream;
+            video.addEventListener('play', () => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.classList.add('hidden'), 500);
+                resizeCanvas();
+                runDetectionLoop();
+            });
+        })
+        .catch(err => {
+            loadingMsg.innerText = state.lang === 'en' ? TRANSLATIONS.en.camError : TRANSLATIONS.ar.camError;
+            loadingMsg.style.color = "#ff2a6d";
+        });
+}
+
+function resizeCanvas() {
+    canvas.width = video.videoWidth || window.innerWidth;
+    canvas.height = video.videoHeight || window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+
+// --- Core AI Loop ---
+async function runDetectionLoop() {
+    // Detection options: TinyFace is faster for mobile
+    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+
+    setInterval(async () => {
+        if (!video.paused && !video.ended) {
+            const detections = await faceapi.detectAllFaces(video, options).withFaceExpressions();
+            state.rawDetections = detections;
+            
+            // Logic Trigger (Mood description & Voice)
+            if(detections.length > 0) processLogic(detections[0]);
+        }
+    }, 100); // Run AI every 100ms
+
+    requestAnimationFrame(renderLoop); // Run render at 60fps
+}
+
+// --- Rendering Engine (Smooth Animations) ---
+function renderLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Smoothly interpolate bounding boxes
+    // If we have raw detections, we update our state.detections to match them slowly
+    
+    // Simple mapping: Match raw detections to existing tracked detections by distance
+    // For this demo, we will just draw raw detections but animate the bars via CSS-like logic in JS
+    
+    const dims = faceapi.matchDimensions(canvas, video, true);
+    
+    state.rawDetections.forEach(detection => {
+        const box = detection.detection.box;
+        const expressions = detection.expressions;
+        
+        // Draw Box
+        drawAnimatedBox(box, expressions);
+    });
+
+    requestAnimationFrame(renderLoop);
+}
+
+function drawAnimatedBox(box, expressions) {
+    // Scale box based on display size vs actual video size
+    const x = box.x * (canvas.width / video.videoWidth);
+    const y = box.y * (canvas.height / video.videoHeight);
+    const w = box.width * (canvas.width / video.videoWidth);
+    const h = box.height * (canvas.height / video.videoHeight);
+
+    // Glow Effect
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = CONFIG.colors.primary;
+    ctx.strokeStyle = CONFIG.colors.primary;
+    ctx.lineWidth = 2;
+    
+    // Rounded Rect
+    const radius = 10;
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.shadowBlur = 0; // Reset shadow
+
+    // Get Dominant Emotion
+    const dominant = getDominantEmotion(expressions);
+    const t = TRANSLATIONS[state.lang];
+    const emotionName = t.emotions[dominant.label];
+    const percentage = Math.round(dominant.value * 100);
+
+    // Draw HUD above box
+    drawHUD(x, y, w, emotionName, percentage, expressions);
+}
+
+function drawHUD(x, y, w, name, percent, allExpressions) {
+    const barWidth = 100;
+    const barHeight = 6;
+    const pad = 10;
+    
+    // Background for HUD
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(x, y - 60, w, 55);
+
+    // Text
+    ctx.font = "bold 14px Inter, Cairo";
+    ctx.fillStyle = CONFIG.colors.text;
+    ctx.textAlign = "center";
+    ctx.fillText(`${name} ${percent}%`, x + w/2, y - 42);
+
+    // Bars (Top 3 emotions)
+    const sorted = Object.entries(allExpressions)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3);
+
+    let startY = y - 25;
+    sorted.forEach(([emo, val], index) => {
+        const widthPct = val * w; // Scale bar to face width
+        const label = TRANSLATIONS[state.lang].emotions[emo];
+        
+        // Bar bg
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.fillRect(x + 10, startY + (index * 8), w - 20, 4);
+        
+        // Bar fill
+        ctx.fillStyle = index === 0 ? CONFIG.colors.primary : CONFIG.colors.secondary;
+        ctx.fillRect(x + 10, startY + (index * 8), (w - 20) * val, 4);
+    });
+}
+
+// --- Logic & Intelligence ---
+function getDominantEmotion(expressions) {
+    return Object.entries(expressions)
+        .reduce((acc, curr) => acc[1] > curr[1] ? acc : curr);
+}
+
+function processLogic(detection) {
+    const dominant = getDominantEmotion(detection.expressions);
+    const [label, score] = dominant;
+    
+    // Update Mood Text
+    const moodList = TRANSLATIONS[state.lang].moods[label];
+    // Pick a random phrase from the list occasionally or keep static until change
+    // To prevent flickering text, we only update if the dominant emotion changes significantly
+    // or periodically. Here we simply pick one based on hash of time to rotate it slowly.
+    const phraseIndex = Math.floor(Date.now() / 5000) % moodList.length;
+    moodDesc.innerText = moodList[phraseIndex];
+
+    // Voice System
+    const now = Date.now();
+    if (score > CONFIG.voiceConfidenceThreshold && (now - state.lastVoiceTime > CONFIG.voiceDelay)) {
+        speak(label);
+        state.lastVoiceTime = now;
+    }
+}
+
+function speak(emotionKey) {
+    if (!window.speechSynthesis) return;
+    
+    const text = TRANSLATIONS[state.lang].emotions[emotionKey];
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Try to find a voice matching the language
+    const voices = window.speechSynthesis.getVoices();
+    const langCode = state.lang === 'ar' ? 'ar-EG' : 'en-US';
+    const selectedVoice = voices.find(v => v.lang.includes(langCode.split('-')[0]));
+    
+    if (selectedVoice) utterance.voice = selectedVoice;
+    utterance.lang = langCode;
+    utterance.rate = 1.1;
+    
+    window.speechSynthesis.cancel(); // Stop previous
+    window.speechSynthesis.speak(utterance);
+}
+
+// --- UI Interactions ---
+
+// Language Toggle
+langBtn.addEventListener('click', () => {
+    state.lang = state.lang === 'en' ? 'ar' : 'en';
+    document.body.classList.toggle('rtl', state.lang === 'ar');
+    langBtn.innerText = state.lang === 'en' ? 'AR / EN' : 'EN / AR';
+    loadingMsg.innerText = state.lang === 'en' ? TRANSLATIONS.en.loading : TRANSLATIONS.ar.loading;
+});
+
+// Take Photo
+btnPhoto.addEventListener('click', () => {
+    // Create temporary canvas to merge video + overlay
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = video.videoWidth;
+    tempCanvas.height = video.videoHeight;
+    const tCtx = tempCanvas.getContext('2d');
+    
+    // Draw video frame (mirrored if needed)
+    tCtx.translate(tempCanvas.width, 0);
+    tCtx.scale(-1, 1);
+    tCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // Note: Drawing the overlay perfectly aligned requires complex coordinate math 
+    // due to CSS object-fit: cover. For simplicity in this single file, 
+    // we capture the video frame primarily.
+    
+    const data = tempCanvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `emotion-ai-${Date.now()}.png`;
+    link.href = data;
+    link.click();
+});
+
+// Record Video
+btnRecord.addEventListener('click', () => {
+    if (state.isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+});
+
+function startRecording() {
+    state.recordedChunks = [];
+    // Capture stream from canvas (which has video drawn on it? No, easier to capture video element stream)
+    // But we want the UI overlay? Capturing canvas stream is best for "What you see is what you get"
+    // However, canvas stream doesn't include audio easily without complex setup.
+    // We will record the MediaStream from getUserMedia directly.
+    
+    const stream = video.srcObject;
+    state.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    
+    state.mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) state.recordedChunks.push(e.data);
+    };
+    
+    state.mediaRecorder.onstop = saveVideo;
+    state.mediaRecorder.start();
+    
+    state.isRecording = true;
+    btnRecord.classList.add('recording');
+}
+
+function stopRecording() {
+    state.mediaRecorder.stop();
+    state.isRecording = false;
+    btnRecord.classList.remove('recording');
+}
+
+function saveVideo() {
+    const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `emotion-rec-${Date.now()}.webm`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Start App
+init();
+
+</script>
+</body>
+</html>
+
